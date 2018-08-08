@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SmartSecretary</string>
+    <string name="create_alarm">新增鬧鐘</string>
 </resources>
