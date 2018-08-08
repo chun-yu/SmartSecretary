@@ -17,13 +17,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".Alarm">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+    </activity>
+        <activity android:name=".AddItem">
         </activity>
-
         <receiver android:name="ＡlarmReceiver"></receiver>
     </application>
 
