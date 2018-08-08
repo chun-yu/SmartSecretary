@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">SmartSecretary</string>
+    <string name="title_name">智 慧 秘 書</string>
+    <string name="new_note">新 增 記 事</string>
+    <string name="my_alarm">我 的 鬧 鐘</string>
+    <string name="my_note">記 事 本</string>
+    <string name="voice">語 音</string>
 </resources>
