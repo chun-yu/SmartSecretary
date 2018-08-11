@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TimePicker;
@@ -36,21 +37,24 @@ public class Alarm extends Activity {
             public void onClick(View v) {
                 final Calendar c = Calendar.getInstance();
                 int hour = c.get(Calendar.HOUR_OF_DAY);
-                int minute = c.get(Calendar.MINUTE);
+                int min = c.get(Calendar.MINUTE);
                 new TimePickerDialog(Alarm.this, new TimePickerDialog.OnTimeSetListener(){
-
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        String timeStr = hourOfDay + ":" + minute;
+                        String timeStr = "";
+                        if (minute < 10)
+                            timeStr = hourOfDay + ":0" + minute;
+                        else
+                            timeStr = hourOfDay + ":" + minute;
                         alarmTimeList.add(timeStr);
-                        arrAdap.add(timeStr);
                         arrAdap.notifyDataSetChanged();
                     }
-                }, hour, minute, false).show();
+                }, hour, min, false).show();
             }
         });
         arrAdap = new ArrayAdapter(Alarm.this,
-                android.R.layout.simple_list_item_1);
+                android.R.layout.simple_list_item_1,
+                alarmTimeList);
         alarmList.setAdapter(arrAdap);
 
         alarmList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -62,9 +66,8 @@ public class Alarm extends Activity {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                arrAdap.remove(alarmTimeList.get(position));
-                                arrAdap.notifyDataSetChanged();
                                 alarmTimeList.remove(position);
+                                arrAdap.notifyDataSetChanged();
                                 //Log.d("AlarmTimeList Size : ", alarmTimeList.size() + "");
                             }
                         })
@@ -75,8 +78,31 @@ public class Alarm extends Activity {
                             }
                         })
                         .show();
+                return true;
+            }
+        });
+        alarmList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+                int hour = Integer.parseInt(alarmTimeList.get(position).split(":")[0]);
+                int min = Integer.parseInt(alarmTimeList.get(position).split(":")[1]);
+                new TimePickerDialog(Alarm.this, new TimePickerDialog.OnTimeSetListener(){
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        String timeStr = "";
+                        if (minute < 10)
+                            timeStr = hourOfDay + ":0" + minute;
+                        else
+                            timeStr = hourOfDay + ":" + minute;
+                        alarmTimeList.set(position, timeStr);
+                        arrAdap.notifyDataSetChanged();
+                        /*
+                        for (int i = 0; i < alarmTimeList.size(); i++)
+                            Log.d("AlarmTimeList : ", alarmTimeList.get(i) + "");
+                        */
+                    }
+                }, hour, min, false).show();
 
-                return false;
             }
         });
     }
