@@ -6,12 +6,9 @@
     <string name="my_alarm">我 的 鬧 鐘</string>
     <string name="my_note">記 事 本</string>
     <string name="voice">語 音</string>
-<<<<<<< HEAD
-=======
     <string name="image">照 片</string>
     <string name="date_num">2018/08/08</string>
     <string name="date">日 期</string>
     <string name="back">返 回</string>
     <string name="time_num">07 : 30</string>
->>>>>>> master
 </resources>

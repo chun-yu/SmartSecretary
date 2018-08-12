@@ -5,12 +5,13 @@ import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TimePicker;
@@ -20,9 +21,12 @@ import java.util.Calendar;
 
 public class Alarm extends Activity {
 
+    private DBHelper helper = null;
     private Button btnNewAlarm;
     private AlarmManager alarmManager;
     private ListView alarmList;
+    int counter = 0;
+    Cursor cursor;
     ArrayAdapter arrAdap;
     ArrayList<String> alarmTimeList = new ArrayList<String>();
 
@@ -31,7 +35,12 @@ public class Alarm extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.clock_layout);
 
+        helper = new DBHelper(this);
+        final SQLiteDatabase write_db = helper.getWritableDatabase();
+        //helper.close();
+
         initView();
+        showTime();
         btnNewAlarm.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -46,6 +55,8 @@ public class Alarm extends Activity {
                             timeStr = hourOfDay + ":0" + minute;
                         else
                             timeStr = hourOfDay + ":" + minute;
+                        counter++;
+                        helper.insertInfo(write_db, counter, timeStr);
                         alarmTimeList.add(timeStr);
                         arrAdap.notifyDataSetChanged();
                     }
@@ -66,7 +77,9 @@ public class Alarm extends Activity {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                helper.removeInfo(write_db, position+1);
                                 alarmTimeList.remove(position);
+                                counter--;
                                 arrAdap.notifyDataSetChanged();
                                 //Log.d("AlarmTimeList Size : ", alarmTimeList.size() + "");
                             }
@@ -94,6 +107,7 @@ public class Alarm extends Activity {
                             timeStr = hourOfDay + ":0" + minute;
                         else
                             timeStr = hourOfDay + ":" + minute;
+                        helper.updateInfo(write_db, position+1,timeStr);
                         alarmTimeList.set(position, timeStr);
                         arrAdap.notifyDataSetChanged();
                         /*
@@ -111,5 +125,25 @@ public class Alarm extends Activity {
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         btnNewAlarm = (Button)findViewById(R.id.btnNewAlarm);
         alarmList = (ListView)findViewById(R.id.alarmList);
+    }
+
+    private void showTime() {
+        cursor = helper.getInfo(helper.getReadableDatabase());
+        if (cursor != null) {
+            cursor.moveToFirst();
+            //Log.d("getCount() ", cursor.getCount() + "");
+            for (int i = 0; i < cursor.getCount(); i++) {
+                counter++;
+                int id = cursor.getInt(0);
+                int number = cursor.getInt(1);
+                String time = cursor.getString(2);
+                Log.d("ID ", id + "");
+                Log.d("COUNTER ", number + "");
+                Log.d("TIME ", time);
+                alarmTimeList.add(time);
+                cursor.moveToNext();
+            }
+            //Log.d("getCount() ", cursor.getCount() + "");
+        }
     }
 }
