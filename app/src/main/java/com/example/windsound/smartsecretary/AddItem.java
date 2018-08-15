@@ -3,6 +3,7 @@ package com.example.windsound.smartsecretary;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -32,7 +33,12 @@ public class AddItem extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_item);
-
+        back_btn = (Button) findViewById(R.id.back_btn);
+        back_btn.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+                finish();
+            }
+        });
         alarm_switch = (Switch) findViewById(R.id.alarm_switch);
         alarm_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -148,5 +154,12 @@ public class AddItem extends Activity {
                 title_layout.setError(null);//hide
         }
     };
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 }
