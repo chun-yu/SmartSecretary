@@ -13,6 +13,8 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String TABLE_NAME = "alarm";
     private static final String TIME = "alarm_time";
     private static final String COUNTER = "alarm_number";
+    private static final String TITLE = "title";
+    private static final String NOTE = "note";
     private static final int DB_VERSION = 1;
 
     public DBHelper(Context context) {
@@ -28,7 +30,9 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     COUNTER + " INTEGER NOT NULL, " +
-                    TIME + " CHAR NOT NULL)");
+                    TIME + " CHAR, " +
+                    TITLE + " CHAR, " +
+                    NOTE + " TEXT)");
     }
 
     @Override
@@ -39,17 +43,21 @@ public class DBHelper extends SQLiteOpenHelper {
         //onCreate(db);
     }
 
-    public void insertInfo(SQLiteDatabase db, int counter, String time) {
+    public void insertInfo(SQLiteDatabase db, int counter, String time, String title, String note) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COUNTER, counter);
         contentValues.put(TIME, time);
+        contentValues.put(TITLE, title);
+        contentValues.put(NOTE, note);
         db.insert(TABLE_NAME, null, contentValues);
     }
 
-    public void updateInfo(SQLiteDatabase db, int rowId, String time) {
+    public void updateInfo(SQLiteDatabase db, int rowId, String time, String title, String note) {
         String id = rowId + "";
         ContentValues contentValues = new ContentValues();
         contentValues.put(TIME, time);
+        contentValues.put(TITLE, title);
+        contentValues.put(NOTE, note);
         db.update(TABLE_NAME, contentValues, COUNTER + "=?", new String[] {id});
         //db.execSQL("Update " + TABLE_NAME + " set " + TIME + "=" + time + " Where " + COUNTER + "=" + id);
     }
@@ -61,6 +69,6 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getInfo(SQLiteDatabase db) {
-        return  db.query(TABLE_NAME, new String[] {_ID, COUNTER, TIME}, null, null, null, null, null);
+        return  db.query(TABLE_NAME, new String[] {_ID, COUNTER, TIME, TITLE, NOTE}, null, null, null, null, null);
     }
 }
