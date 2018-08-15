@@ -3,11 +3,15 @@ package com.example.windsound.smartsecretary;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,6 +28,7 @@ public class Alarm extends Activity {
     private DBHelper helper = null;
     private Button btnNewAlarm;
     private AlarmManager alarmManager;
+    private PendingIntent alarmIntent;
     private ListView alarmList;
     int counter = 0;
     Cursor cursor;
@@ -41,6 +46,7 @@ public class Alarm extends Activity {
 
         initView();
         showTime();
+        setAlarm(10, 1);
         btnNewAlarm.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -145,5 +151,19 @@ public class Alarm extends Activity {
             }
             //Log.d("getCount() ", cursor.getCount() + "");
         }
+    }
+
+    void setAlarm(int hour, int min) {
+        Intent intent = new Intent(Alarm.this, AlarmReceiver.class);
+        intent.putExtra("msg", "time's_up");
+        alarmIntent = PendingIntent.getBroadcast(Alarm.this, 0, intent, 0);
+        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, min);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis()
+                , alarmIntent);
+
     }
 }
