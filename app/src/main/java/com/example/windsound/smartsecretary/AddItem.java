@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -23,16 +24,19 @@ import java.util.Calendar;
 
 public class AddItem extends Activity {
     private Button back_btn,date_view,finish_add_item,btn_clock,btn_clock_view,phoho_btn,voice_btn;
-    private TextView text_title;
     private Switch alarm_switch;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
     private static SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm");
     private TextInputLayout title_layout,content_layout ;
     private TextInputEditText title_text,content_text;
+    private DBHelper helper = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_item);
+        helper = new DBHelper(this);
+        final SQLiteDatabase write_db = helper.getWritableDatabase();
+
         back_btn = (Button) findViewById(R.id.back_btn);
         back_btn.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
@@ -79,6 +83,16 @@ public class AddItem extends Activity {
         content_layout= (TextInputLayout) findViewById(R.id.content_layout);
         content_text = (TextInputEditText) findViewById(R.id.content_text);
         content_text.addTextChangedListener(mTextWatcher);
+        finish_add_item = (Button) findViewById(R.id.finish_add_item);
+        finish_add_item.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+                if(alarm_switch.isChecked()){
+                    helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1,title_text.getText().toString(), content_text.getText().toString());
+                }else{
+                    helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0,title_text.getText().toString(), content_text.getText().toString());
+                }
+            }
+        });
     }
 
     public void showDatePickerDialog() {

@@ -56,7 +56,7 @@ public class Alarm extends Activity {
                         else
                             timeStr = hourOfDay + ":" + minute;
                         counter++;
-                        helper.insertInfo(write_db, counter, timeStr, null, null);
+                        helper.insertInfo(write_db, counter, timeStr, 1,null, null);
                         alarmTimeList.add(timeStr);
                         arrAdap.notifyDataSetChanged();
                     }
@@ -77,7 +77,7 @@ public class Alarm extends Activity {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                helper.removeInfo(write_db, position+1);
+                                helper.remove_Time(write_db, position+1);
                                 alarmTimeList.remove(position);
                                 counter--;
                                 arrAdap.notifyDataSetChanged();
@@ -107,7 +107,7 @@ public class Alarm extends Activity {
                             timeStr = hourOfDay + ":0" + minute;
                         else
                             timeStr = hourOfDay + ":" + minute;
-                        helper.updateInfo(write_db, position+1,timeStr, null, null);
+                        helper.updateTimeInfo(write_db, position+1,timeStr, 1,null, null);
                         alarmTimeList.set(position, timeStr);
                         arrAdap.notifyDataSetChanged();
                         /*

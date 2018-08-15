@@ -12,7 +12,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "my.db";
     private static final String TABLE_NAME = "alarm";
     private static final String TIME = "alarm_time";
-    private static final String COUNTER = "alarm_number";
+    private static final String CHECK = "_check";
     private static final String TITLE = "title";
     private static final String NOTE = "note";
     private static final int DB_VERSION = 1;
@@ -29,46 +29,57 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    COUNTER + " INTEGER NOT NULL, " +
                     TIME + " CHAR, " +
-                    TITLE + " CHAR, " +
-                    NOTE + " TEXT)");
+                    CHECK + " TINYINT(1),"+
+                    TITLE + " CHAR(10), " +
+                    NOTE + " TEXT(150))");
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db,
-                          int oldVersion, int newVersion) {
+    public void onUpgrade(SQLiteDatabase db,int oldVersion, int newVersion) {
         //final String DROP_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
         //db.execSQL(DROP_TABLE);
         //onCreate(db);
     }
 
-    public void insertInfo(SQLiteDatabase db, int counter, String time, String title, String note) {
+    public void insertInfo(SQLiteDatabase db, String time,int check, String title, String note) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COUNTER, counter);
         contentValues.put(TIME, time);
+        contentValues.put(CHECK, check);
         contentValues.put(TITLE, title);
         contentValues.put(NOTE, note);
         db.insert(TABLE_NAME, null, contentValues);
     }
 
-    public void updateInfo(SQLiteDatabase db, int rowId, String time, String title, String note) {
+    public void updateTimeInfo(SQLiteDatabase db, int rowId, String time, int check,String title, String note) {
         String id = rowId + "";
         ContentValues contentValues = new ContentValues();
         contentValues.put(TIME, time);
+        contentValues.put(CHECK, check);
         contentValues.put(TITLE, title);
         contentValues.put(NOTE, note);
-        db.update(TABLE_NAME, contentValues, COUNTER + "=?", new String[] {id});
+        db.update(TABLE_NAME, contentValues, _ID + "=?", new String[] {id});
         //db.execSQL("Update " + TABLE_NAME + " set " + TIME + "=" + time + " Where " + COUNTER + "=" + id);
     }
 
-    public void removeInfo(SQLiteDatabase db, int rowId) {
+    public void remove_Time(SQLiteDatabase db, int rowId) {
         String id = rowId + "";
-        db.delete(TABLE_NAME, COUNTER + "=" + id, null);
-        db.execSQL("Update " + TABLE_NAME + " set " + COUNTER + "=" + COUNTER + "-1" + " Where " + COUNTER + ">" + id);
+        db.delete(TABLE_NAME, _ID + "=" + id, null);
+    }
+    public boolean remove_Note(int rowId) { //刪除指定的資料
+        return getWritableDatabase().delete(TABLE_NAME, _ID + "=" + rowId, null) > 0;
+    }
+    public int getDBcount() {
+        int result = 0;
+        Cursor cursor = getWritableDatabase().rawQuery("SELECT COUNT(*) FROM " + TABLE_NAME, null);
+        if (cursor.moveToNext()) {
+            result = cursor.getInt(0);
+        }
+        return result;
     }
 
     public Cursor getInfo(SQLiteDatabase db) {
-        return  db.query(TABLE_NAME, new String[] {_ID, COUNTER, TIME, TITLE, NOTE}, null, null, null, null, null);
+        return  db.query(TABLE_NAME, new String[] {_ID, TIME, CHECK, TITLE, NOTE}, null, null, null, null, null);
     }
+
 }
