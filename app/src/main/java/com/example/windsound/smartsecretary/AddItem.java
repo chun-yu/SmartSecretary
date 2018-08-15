@@ -10,6 +10,7 @@ import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -87,9 +88,17 @@ public class AddItem extends Activity {
         finish_add_item.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 if(alarm_switch.isChecked()){
+                    Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +getString(R.string.open_Alaem), Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER,0,0);
+                    toast.show();
                     helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1,title_text.getText().toString(), content_text.getText().toString());
+                    finish();
                 }else{
+                    Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +getString(R.string.close_Alaem), Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER,0,0);
+                    toast.show();
                     helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0,title_text.getText().toString(), content_text.getText().toString());
+                    finish();
                 }
             }
         });

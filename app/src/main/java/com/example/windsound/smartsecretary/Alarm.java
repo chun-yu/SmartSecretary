@@ -62,7 +62,7 @@ public class Alarm extends Activity {
                         else
                             timeStr = hourOfDay + ":" + minute;
                         counter++;
-                        helper.insertInfo(write_db, counter, timeStr, 1,null, null);
+                        helper.insertInfo(write_db, timeStr, 1,null, null);
                         alarmTimeList.add(timeStr);
                         arrAdap.notifyDataSetChanged();
                     }
