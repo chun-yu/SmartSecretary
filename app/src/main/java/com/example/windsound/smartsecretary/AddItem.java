@@ -3,11 +3,9 @@ package com.example.windsound.smartsecretary;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.speech.RecognizerIntent;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
@@ -23,7 +21,6 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 public class AddItem extends Activity {
@@ -34,25 +31,13 @@ public class AddItem extends Activity {
     private TextInputLayout title_layout,content_layout ;
     private TextInputEditText title_text,content_text;
     private DBHelper helper = null;
-    protected static final int RESULT_SPEECH = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_item);
         helper = new DBHelper(this);
         final SQLiteDatabase write_db = helper.getWritableDatabase();
-        voice_btn = (Button) findViewById(R.id.voice_btn);
-        voice_btn.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, "en-US");
-                    try { startActivityForResult(intent, RESULT_SPEECH);
-                        content_text.setText("");
-                    } catch (ActivityNotFoundException a) {
-                        Toast.makeText(getApplicationContext(),"Opps! Your device doesn't support Speech to Text", Toast.LENGTH_SHORT).show();
-                    }
-            }
-        });
+
         back_btn = (Button) findViewById(R.id.back_btn);
         back_btn.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
@@ -200,17 +185,4 @@ public class AddItem extends Activity {
     protected void onResume() {
         super.onResume();
     }
-    @Override
-	    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-            super.onActivityResult(requestCode, resultCode, data);
-            switch (requestCode) {
-                case RESULT_SPEECH: {
-                    if (resultCode == RESULT_OK && null != data) {
-                    ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                        content_text.setText(text.get(0));
-                    }
-                break;
-                }
-            }
-        }
 }
