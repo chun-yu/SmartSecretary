@@ -42,7 +42,7 @@ public class DBHelper extends SQLiteOpenHelper {
         //onCreate(db);
     }
 
-    public void insertInfo(SQLiteDatabase db, String time, int check, String title, String note) {
+    public void insertInfo(SQLiteDatabase db, String time,int check, String title, String note) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(TIME, time);
         contentValues.put(CHECK, check);

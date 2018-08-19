@@ -9,6 +9,7 @@ import android.widget.Button;
 public class SmartSecretary extends AppCompatActivity {
     private Button new_button;
     private Button my_alarm_button;
+    private Button my_note_button;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +29,15 @@ public class SmartSecretary extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent();
                 intent.setClass(SmartSecretary.this, Alarm.class);
+                startActivity(intent);
+            }
+        });
+        my_note_button = (Button) findViewById(R.id.my_note_button);
+        my_note_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.setClass(SmartSecretary.this, memo.class);
                 startActivity(intent);
             }
         });
