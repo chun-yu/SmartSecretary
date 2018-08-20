@@ -3,10 +3,12 @@
     <color name="light_green">#aaffaa</color>
     <color name="pink">#99ff8888</color>
     <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryLight">#ee3F51A5</color>
+    <color name="colorPrimaryLight">#ee3F51b5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="holo_blue_dark">#0088cc</color>
+    <color name="holo_blue_dark">#11aadd</color>
+    <color name="trans_holo_blue_dark">#aa0088cc</color>
+    <color name="little_holo_blue_dark">#330088cc</color>
     <color name="gray">#808080</color>
     <color name="red">#ff2222</color>
     <color name="orange">#FFaa00</color>

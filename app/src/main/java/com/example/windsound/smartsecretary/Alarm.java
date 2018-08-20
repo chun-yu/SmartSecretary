@@ -34,7 +34,7 @@ public class Alarm extends Activity {
     Cursor cursor;
     ArrayAdapter arrAdap;
     ArrayList<String> alarmTimeList = new ArrayList<String>();
-
+    String today_date = AddItem.getToday();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +62,7 @@ public class Alarm extends Activity {
                         else
                             timeStr = hourOfDay + ":" + minute;
                         counter++;
-                        helper.insertInfo(write_db, timeStr, 1,null, null);
+                        helper.insertInfo(write_db, timeStr, 1,today_date,null, null);
                         alarmTimeList.add(timeStr);
                         arrAdap.notifyDataSetChanged();
                     }
@@ -113,7 +113,7 @@ public class Alarm extends Activity {
                             timeStr = hourOfDay + ":0" + minute;
                         else
                             timeStr = hourOfDay + ":" + minute;
-                        helper.updateTimeInfo(write_db, position+1,timeStr, 1,null, null);
+                        helper.updateTimeInfo(write_db, position+1,timeStr, 1,today_date,null, null);
                         alarmTimeList.set(position, timeStr);
                         arrAdap.notifyDataSetChanged();
                         /*

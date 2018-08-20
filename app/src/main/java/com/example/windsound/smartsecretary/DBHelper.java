@@ -13,6 +13,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String TABLE_NAME = "alarm";
     private static final String TIME = "alarm_time";
     private static final String CHECK = "_check";
+    private static final String DATE = "date";
     private static final String TITLE = "title";
     private static final String NOTE = "note";
     private static final int DB_VERSION = 1;
@@ -31,7 +32,8 @@ public class DBHelper extends SQLiteOpenHelper {
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     TIME + " CHAR, " +
                     CHECK + " TINYINT(1),"+
-                    TITLE + " CHAR(10), " +
+                    DATE + " TEXT(10)," +
+                    TITLE + " TEXT(10), " +
                     NOTE + " TEXT(150))");
     }
 
@@ -42,20 +44,22 @@ public class DBHelper extends SQLiteOpenHelper {
         //onCreate(db);
     }
 
-    public void insertInfo(SQLiteDatabase db, String time,int check, String title, String note) {
+    public void insertInfo(SQLiteDatabase db, String time,int check, String date, String title, String note) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(TIME, time);
         contentValues.put(CHECK, check);
+        contentValues.put(DATE, date);
         contentValues.put(TITLE, title);
         contentValues.put(NOTE, note);
         db.insert(TABLE_NAME, null, contentValues);
     }
 
-    public void updateTimeInfo(SQLiteDatabase db, int rowId, String time, int check,String title, String note) {
+    public void updateTimeInfo(SQLiteDatabase db, int rowId, String time, int check, String date ,String title, String note) {
         String id = rowId + "";
         ContentValues contentValues = new ContentValues();
         contentValues.put(TIME, time);
         contentValues.put(CHECK, check);
+        contentValues.put(DATE, date);
         contentValues.put(TITLE, title);
         contentValues.put(NOTE, note);
         db.update(TABLE_NAME, contentValues, _ID + "=?", new String[] {id});
@@ -79,7 +83,12 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getInfo(SQLiteDatabase db) {
-        return  db.query(TABLE_NAME, new String[] {_ID, TIME, CHECK, TITLE, NOTE}, null, null, null, null, null);
+        return  db.query(TABLE_NAME, new String[] {_ID, TIME, CHECK, DATE , TITLE, NOTE}, null, null, null, null, null);
+    }
+    public Cursor getInfoData() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor res = db.rawQuery("select * from " + TABLE_NAME, null);
+        return res;
     }
 
 }

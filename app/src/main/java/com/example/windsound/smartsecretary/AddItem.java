@@ -40,7 +40,6 @@ public class AddItem extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_item);
         helper = new DBHelper(this);
-        final SQLiteDatabase write_db = helper.getWritableDatabase();
         voice_btn = (Button) findViewById(R.id.voice_btn);
         voice_btn.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
@@ -102,19 +101,7 @@ public class AddItem extends Activity {
         finish_add_item = (Button) findViewById(R.id.finish_add_item);
         finish_add_item.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                if(alarm_switch.isChecked()){
-                    Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +getString(R.string.open_Alaem), Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.CENTER,0,0);
-                    toast.show();
-                    helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1,title_text.getText().toString(), content_text.getText().toString());
-                    finish();
-                }else{
-                    Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +getString(R.string.close_Alaem), Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.CENTER,0,0);
-                    toast.show();
-                    helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0,title_text.getText().toString(), content_text.getText().toString());
-                    finish();
-                }
+                check_if_null();
             }
         });
     }
@@ -145,10 +132,10 @@ public class AddItem extends Activity {
             date_view.setText(getToday());
         }
     }
-    private String getToday() {
+    public static String getToday() {
         return sdf.format(Calendar.getInstance().getTime());
     }
-    private String getNewTime() {
+    public static String getNewTime() {
         return sdf2.format(Calendar.getInstance().getTime());
     }
     public void showTimePickerDialog() {
@@ -201,7 +188,7 @@ public class AddItem extends Activity {
         super.onResume();
     }
     @Override
-	    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
             super.onActivityResult(requestCode, resultCode, data);
             switch (requestCode) {
                 case RESULT_SPEECH: {
@@ -212,5 +199,32 @@ public class AddItem extends Activity {
                 break;
                 }
             }
+    }
+
+    private void check_if_null(){
+        final SQLiteDatabase write_db = helper.getWritableDatabase();
+        String s1 = title_text.getText().toString();
+        String s2 = content_text.getText().toString();
+        if(s1.equals("") && !s2.equals("")){
+            Toast.makeText(AddItem.this,getString(R.string.please_title), Toast.LENGTH_LONG).show();
+        }else if(!s1.equals("") && s2.equals("")){
+            Toast.makeText(AddItem.this,getString(R.string.content), Toast.LENGTH_LONG).show();
+        }else if(s1.equals("") && s2.equals("")){
+            Toast.makeText(AddItem.this,getString(R.string.please_title)+"\n"+getString(R.string.content), Toast.LENGTH_LONG).show();
+        }else{
+            if(alarm_switch.isChecked()){
+                Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +"\n"+getString(R.string.open_Alaem), Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER,0,0);
+                toast.show();
+                helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1,date_view.getText().toString(),title_text.getText().toString(), content_text.getText().toString());
+                finish();
+            }else{
+                Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +"\n"+getString(R.string.close_Alaem), Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER,0,0);
+                toast.show();
+                helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0,date_view.getText().toString(),title_text.getText().toString(), content_text.getText().toString());
+                finish();
+            }
         }
+    }
 }

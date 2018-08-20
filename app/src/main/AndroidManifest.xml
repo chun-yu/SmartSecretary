@@ -20,6 +20,10 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan|stateHidden">
         </activity>
+        <activity android:name=".memo"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan|stateHidden">
+        </activity>
         <receiver android:name=".AlarmReceiver">
         </receiver>
         <receiver android:name="AlarmReceiver"></receiver>

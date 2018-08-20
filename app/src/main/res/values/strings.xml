@@ -15,10 +15,18 @@
     <string name="time">時 間</string>
     <string name="title">標 題</string>
     <string name="noSet">未 命 名</string>
+    <string name="unknow">未 知</string>
     <string name="remind">提 醒</string>
     <string name="content">請 輸 入 內 容</string>
     <string name="please_title">請 輸 入 標 題</string>
     <string name="open_Alaem">開 啟 提 醒</string>
     <string name="close_Alaem">關 閉 提 醒</string>
     <string name="new_success">新 增 提 醒</string>
+    <string name="monday">星期一</string>
+    <string name="tuesday">星期二</string>
+    <string name="wednesday">星期三</string>
+    <string name="thursday">星期四</string>
+    <string name="friday">星期五</string>
+    <string name="saturday">星期六</string>
+    <string name="sunday">星期日</string>
 </resources>
