@@ -12,21 +12,24 @@
         <activity android:name=".SmartSecretary">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Alarm"></activity>
-        <activity android:name=".AddItem"
+        <activity android:name=".Alarm" />
+        <activity
+            android:name=".AddItem"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden">
-        </activity>
-        <activity android:name=".memo"
+            android:windowSoftInputMode="adjustPan|stateHidden"></activity>
+        <activity
+            android:name=".memo"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden">
-        </activity>
-        <receiver android:name=".AlarmReceiver">
-        </receiver>
-        <receiver android:name="AlarmReceiver"></receiver>
+            android:windowSoftInputMode="adjustPan|stateHidden"></activity>
+
+        <receiver android:name=".AlarmReceiver"></receiver>
+        <receiver android:name=".AlarmReceiver" />
+
+        <activity android:name=".AlarmSetting"></activity>
     </application>
 
 </manifest>

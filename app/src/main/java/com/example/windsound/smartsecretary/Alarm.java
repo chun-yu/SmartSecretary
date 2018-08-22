@@ -13,15 +13,23 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.TimePicker;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+
+import static android.app.PendingIntent.FLAG_ONE_SHOT;
 
 public class Alarm extends Activity {
 
@@ -30,11 +38,17 @@ public class Alarm extends Activity {
     private AlarmManager alarmManager;
     private PendingIntent alarmIntent;
     private ListView alarmList;
-    int counter = 0;
+    LinearLayout LLV, LLH;
+    TextView tvAlarmTime, tvID;
     Cursor cursor;
+    Switch swAlarm;
     ArrayAdapter arrAdap;
     ArrayList<String> alarmTimeList = new ArrayList<String>();
+    ArrayList<Integer> alarmIDList = new ArrayList<Integer>();
     String today_date = AddItem.getToday();
+    LayoutInflater inflater;
+    View view_alarm_display;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +60,7 @@ public class Alarm extends Activity {
 
         initView();
         showTime();
-        setAlarm(10, 1);
+        //setAlarm(13, 3, RC);
         btnNewAlarm.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -61,17 +75,33 @@ public class Alarm extends Activity {
                             timeStr = hourOfDay + ":0" + minute;
                         else
                             timeStr = hourOfDay + ":" + minute;
-                        counter++;
-                        helper.insertInfo(write_db, timeStr, 1,today_date,null, null);
-                        alarmTimeList.add(timeStr);
-                        arrAdap.notifyDataSetChanged();
+                        helper.insertInfo(write_db, timeStr, 1, today_date, null, null);
+                        updateIDList();
+                        setAlarm(hourOfDay, minute, alarmIDList.get(alarmIDList.size()-1));
+                        //arrAdap.notifyDataSetChanged();
+                        LLV.removeView(view_alarm_display);
+                        tvAlarmTime.setText(timeStr);
+                        tvAlarmTime.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(Alarm.this,AlarmSetting.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("time", tvAlarmTime.getText().toString());
+                                intent.putExtras(bundle);
+                                startActivity(intent);
+                            }
+                        });
+                        LLV.addView(view_alarm_display);
                     }
                 }, hour, min, false).show();
             }
         });
+
+        /*
         arrAdap = new ArrayAdapter(Alarm.this,
-                android.R.layout.simple_list_item_1,
+                android.R.layout.select_dialog_item,
                 alarmTimeList);
+        alarmList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         alarmList.setAdapter(arrAdap);
 
         alarmList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -83,9 +113,10 @@ public class Alarm extends Activity {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                helper.remove_Time(write_db, position+1);
+                                helper.remove_Time(write_db, alarmIDList.get(position));
+                                cancelAlarm(alarmIDList.get(position));
                                 alarmTimeList.remove(position);
-                                counter--;
+                                alarmIDList.remove(position);
                                 arrAdap.notifyDataSetChanged();
                                 //Log.d("AlarmTimeList Size : ", alarmTimeList.size() + "");
                             }
@@ -100,6 +131,7 @@ public class Alarm extends Activity {
                 return true;
             }
         });
+
         alarmList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
@@ -113,57 +145,107 @@ public class Alarm extends Activity {
                             timeStr = hourOfDay + ":0" + minute;
                         else
                             timeStr = hourOfDay + ":" + minute;
-                        helper.updateTimeInfo(write_db, position+1,timeStr, 1,today_date,null, null);
+                        helper.updateTimeInfo(write_db, alarmIDList.get(position),timeStr, 1, today_date, null, null);
+                        cancelAlarm(alarmIDList.get(position));
+                        setAlarm(hourOfDay, minute, alarmIDList.get(position));
                         alarmTimeList.set(position, timeStr);
                         arrAdap.notifyDataSetChanged();
-                        /*
-                        for (int i = 0; i < alarmTimeList.size(); i++)
-                            Log.d("AlarmTimeList : ", alarmTimeList.get(i) + "");
-                        */
+                        //for (int i = 0; i < alarmTimeList.size(); i++)
+                        //Log.d("AlarmTimeList : ", alarmTimeList.get(i) + "");
                     }
                 }, hour, min, false).show();
-
             }
         });
+        */
     }
 
     private void initView() {
+        inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         btnNewAlarm = (Button)findViewById(R.id.btnNewAlarm);
-        alarmList = (ListView)findViewById(R.id.alarmList);
+        //alarmList = (ListView)findViewById(R.id.alarmList);
+        LLV = (LinearLayout)findViewById(R.id.LLV);
     }
 
     private void showTime() {
         cursor = helper.getInfo(helper.getReadableDatabase());
+        alarmTimeList.clear();
+        alarmIDList.clear();
         if (cursor != null) {
             cursor.moveToFirst();
             //Log.d("getCount() ", cursor.getCount() + "");
             for (int i = 0; i < cursor.getCount(); i++) {
-                counter++;
-                int id = cursor.getInt(0);
-                int number = cursor.getInt(1);
-                String time = cursor.getString(2);
+                final int id = cursor.getInt(0);
+                final String time = cursor.getString(1);
+                int check = cursor.getInt(2);
+                String date = cursor.getString(3);
                 Log.d("ID ", id + "");
-                Log.d("COUNTER ", number + "");
                 Log.d("TIME ", time);
-                alarmTimeList.add(time);
+                Log.d("CHECK ", check + "");
+                Log.d("DATE ", date + "");
+                tvAlarmTime = new TextView(getBaseContext());
+                view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
+                tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
+                swAlarm = (Switch) view_alarm_display.findViewById(R.id.swAlarm);
+                LLH = (LinearLayout) view_alarm_display.findViewById(R.id.LLH);
+                tvID = (TextView) view_alarm_display.findViewById(R.id.tvID);
+                tvAlarmTime.setText(time);
+                tvID.setText(id + "");
+                tvAlarmTime.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(Alarm.this,AlarmSetting.class);
+                        Bundle bundle = new Bundle();
+
+                        bundle.putString("time", time);
+                        bundle.putInt("ID", id);
+                        intent.putExtras(bundle);
+                        startActivity(intent);
+                    }
+                });
+                LLV.addView(view_alarm_display);
+                if (check == 1) {
+                    alarmTimeList.add(time);
+                    alarmIDList.add(id);
+                    swAlarm.setChecked(true);
+                }
                 cursor.moveToNext();
             }
             //Log.d("getCount() ", cursor.getCount() + "");
         }
     }
 
-    void setAlarm(int hour, int min) {
+    void updateIDList() {
+        alarmIDList.clear();
+        if (cursor != null) {
+            cursor.moveToFirst();
+            for (int i = 0; i < cursor.getCount(); i++) {
+                int id = cursor.getInt(0);
+                alarmIDList.add(id);
+                cursor.moveToNext();
+            }
+        }
+    }
+
+    void setAlarm(int hour, int min, int RC) {
         Intent intent = new Intent(Alarm.this, AlarmReceiver.class);
         intent.putExtra("msg", "time's_up");
-        alarmIntent = PendingIntent.getBroadcast(Alarm.this, 0, intent, 0);
-        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+        alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+        alarmIntent = PendingIntent.getBroadcast(Alarm.this, RC, intent, PendingIntent.FLAG_ONE_SHOT);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, min);
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis()
                 , alarmIntent);
+    }
 
+    void cancelAlarm(int RC) {
+        Intent intent = new Intent(Alarm.this, AlarmReceiver.class);
+        alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+        alarmIntent = PendingIntent.getBroadcast(Alarm.this, RC, intent, FLAG_ONE_SHOT);
+
+        alarmManager.cancel(alarmIntent);
+        alarmIntent = null;
     }
 }
