@@ -46,8 +46,11 @@ public class Alarm extends Activity {
     ArrayList<String> alarmTimeList = new ArrayList<String>();
     ArrayList<Integer> alarmIDList = new ArrayList<Integer>();
     String today_date = AddItem.getToday();
+<<<<<<< HEAD
     LayoutInflater inflater;
     View view_alarm_display;
+=======
+>>>>>>> master
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

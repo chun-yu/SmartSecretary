@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -45,8 +44,6 @@ public class memo extends Activity {
         res = helper.getInfoData();
         int[] datearrary = new int[100];
         int count = 0;
-        boolean putid = false;
-        ArrayList<Integer> idarrary = new ArrayList<Integer>();
         String[] splitarrary = new String[3];
         for (int i = memo_show.getChildCount(); i >= 0; i--) {
             memo_show.removeView(memo_show.getChildAt(i));
@@ -61,9 +58,32 @@ public class memo extends Activity {
             count++;
         }
         Arrays.sort(datearrary);
-        count = 0;
-        for (int i = datearrary.length; i > 0; i--) {
-            int k = datearrary[i - 1];
+        String  today = AddItem.getToday();
+        splitarrary = today.split("/");
+        int today_year = Integer.parseInt(splitarrary[0]);
+        int today_month = Integer.parseInt(splitarrary[1]);
+        int today_day = Integer.parseInt(splitarrary[2]);
+        count = today_year * 10000 + today_month * 100 + today_day;
+        int big = datearrary.length;
+        int small = 0;
+        for (int i = datearrary.length; i > 0;i--){
+            if(datearrary[i-1]==count){
+                big = big -1;
+            }else if(datearrary[i-1]<count){
+                small=i-1;break;
+            }else{
+                big = big -1;
+            }
+        }
+        putin_array_add_show(datearrary,big,small);
+    }
+    private void putin_array_add_show(int[] datearrary,int big,int small){
+        boolean putid = false;
+        ArrayList<Integer> big_idarrary = new ArrayList<Integer>();
+        ArrayList<Integer> small_idarrary = new ArrayList<Integer>();
+        String[] splitarrary = new String[3];
+        for (int i = big; i < datearrary.length; i++) {
+            int k = datearrary[i];
             res = helper.getInfoData();
             while (res.moveToNext()) {
                 String s2 = res.getString(3);
@@ -72,33 +92,68 @@ public class memo extends Activity {
                 int month = Integer.parseInt(splitarrary[1]);
                 int day = Integer.parseInt(splitarrary[2]);
                 int date = year * 10000 + month * 100 + day;
+                String text1 = res.getString(4);
+                String text2 = res.getString(5);
                 if (date == k) {
                     putid = true;
-                    for (int j = 0; j < idarrary.size(); j++) {
-                        if (idarrary.get(j) == res.getInt(0)) {
+                    for (int j = 0; j < big_idarrary.size(); j++) {
+                        if (big_idarrary.get(j) == res.getInt(0)) {
                             putid = false;
                         }
                     }
                     if (putid) {
-                        if(!res.getString(4).equals("") && !res.getString(5).equals("")){
-                            idarrary.add(res.getInt(0));
+                        if(text1 != null && text2 != null){
+                            big_idarrary.add(res.getInt(0));
                         }
                     }
                 }
             }
         }
-        for (int i = 0; i < idarrary.size(); i++) {
-            if (idarrary.get(i) == 0) {
-            }
+        for (int i = 0; i <= small; i++) {
+            int k = datearrary[i];
             res = helper.getInfoData();
             while (res.moveToNext()) {
-                if (idarrary.get(i) == res.getInt(0)) {
-                    add_table_show(res.getString(3), res.getString(4), res.getString(1),res.getInt(2));
+                String s2 = res.getString(3);
+                splitarrary = s2.split("/");
+                int year = Integer.parseInt(splitarrary[0]);
+                int month = Integer.parseInt(splitarrary[1]);
+                int day = Integer.parseInt(splitarrary[2]);
+                int date = year * 10000 + month * 100 + day;
+                String text1 = res.getString(4);
+                String text2 = res.getString(5);
+                if (date == k) {
+                    putid = true;
+                    for (int j = 0; j < small_idarrary.size(); j++) {
+                        if (small_idarrary.get(j) == res.getInt(0)) {
+                            putid = false;
+                        }
+                    }
+                    if (putid) {
+                        if(text1 != null && text2 != null){
+                            small_idarrary.add(res.getInt(0));
+                        }
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < big_idarrary.size(); i++) {
+            res = helper.getInfoData();
+            while (res.moveToNext()) {
+                if (big_idarrary.get(i) == res.getInt(0)) {
+                    add_table_show(getResources().getColor(R.color.little_holo_blue_dark),res.getString(3), res.getString(4), res.getString(1),res.getInt(2));
+                }
+            }
+        }
+        for (int i = 0; i < small_idarrary.size(); i++) {
+            res = helper.getInfoData();
+            while (res.moveToNext()) {
+                if (small_idarrary.get(i) == res.getInt(0)) {
+                    add_table_show(getResources().getColor(R.color.trans_red),res.getString(3), res.getString(4), res.getString(1),res.getInt(2));
                 }
             }
         }
     }
-    private void add_table_show(String _datee, String _title,String _time,  int _check) {
+    private void add_table_show(int color,String _datee, String _title,String _time,  int _check) {
         final String date = _datee;
         final String title = _title;
         final String time = _time;
@@ -113,7 +168,7 @@ public class memo extends Activity {
             }
         });
 
-        tr.setBackgroundColor(getResources().getColor(R.color.little_holo_blue_dark));
+        tr.setBackgroundColor(color);
         LinearLayout.LayoutParams  params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,240);
         params.setMargins(30,20,30,15);
         tr.setLayoutParams(params);
@@ -170,8 +225,16 @@ public class memo extends Activity {
         ttr2.addView(tv4);
         tr.addView(ttr1);
         tr.addView(ttr2);
+
+        final LinearLayout space = new LinearLayout(this);
+        space.setBackgroundColor(getResources().getColor(R.color.gray));
+        LinearLayout.LayoutParams  params2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,10);
+        params2.setMargins(30,0,30,0);
+        space.setLayoutParams(params2);
+
         /* Add row to TableLayout. */
         memo_show.addView(tr);
+        memo_show.addView(space);
     }
     private String getDay_of_week(String date){
         Calendar c = Calendar.getInstance();
