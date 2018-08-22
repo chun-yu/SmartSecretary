@@ -35,6 +35,7 @@ public class Alarm extends Activity {
     ArrayAdapter arrAdap;
     ArrayList<String> alarmTimeList = new ArrayList<String>();
     String today_date = AddItem.getToday();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

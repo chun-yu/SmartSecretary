@@ -11,7 +11,8 @@
         android:layout_width="0dp"
         android:layout_height="45dp"
         android:background="@color/colorPrimaryLight"
-        android:text="返回"
+        android:text="@string/back"
+        android:textSize="16dp"
         android:textColor="@android:color/background_light"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -32,16 +33,17 @@
         app:layout_constraintRight_toLeftOf="@+id/search_btn"
         app:layout_constraintHorizontal_weight="5"
         />
+
     <ImageButton
         android:id="@+id/search_btn"
         android:layout_width="0dp"
         android:layout_height="45dp"
         android:background="@color/colorPrimaryLight"
-        app:srcCompat="@android:drawable/ic_menu_search"
-        app:layout_constraintTop_toTopOf="parent"
+        android:src="@android:drawable/ic_menu_search"
+        app:layout_constraintHorizontal_weight="1"
         app:layout_constraintLeft_toRightOf="@+id/memo"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintHorizontal_weight="1" />
+        app:layout_constraintTop_toTopOf="parent" />
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -63,11 +65,12 @@
         android:layout_height="60dp"
         android:layout_marginBottom="40dp"
         android:layout_marginRight="30dp"
-        android:clickable="true"
         app:backgroundTint="@color/trans_holo_blue_dark"
+        android:clickable="true"
+        android:focusable="true"
         app:fabSize="normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:srcCompat="@drawable/plus" />
+        android:src="@drawable/plus" />
 
 </android.support.constraint.ConstraintLayout>
