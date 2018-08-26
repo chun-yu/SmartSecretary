@@ -16,15 +16,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-<<<<<<< HEAD
         <activity android:name=".Alarm" />
-        <activity
-            android:name=".AddItem"
-=======
-        <activity android:name=".Alarm">
-    </activity>
         <activity android:name=".AddItem"
->>>>>>> master
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan|stateHidden"></activity>
         <activity

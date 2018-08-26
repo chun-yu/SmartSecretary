@@ -12,6 +12,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,23 +35,20 @@ import static android.app.PendingIntent.FLAG_ONE_SHOT;
 public class Alarm extends Activity {
 
     private DBHelper helper = null;
-    private Button btnNewAlarm;
+    private FloatingActionButton fabNewAlarm;
     private AlarmManager alarmManager;
     private PendingIntent alarmIntent;
-    private ListView alarmList;
-    LinearLayout LLV, LLH;
-    TextView tvAlarmTime, tvID;
+    LinearLayout LLV, LLV_display;
+    TextView tvAlarmTime;
     Cursor cursor;
     Switch swAlarm;
-    ArrayAdapter arrAdap;
     ArrayList<String> alarmTimeList = new ArrayList<String>();
     ArrayList<Integer> alarmIDList = new ArrayList<Integer>();
+    ArrayList<Integer> checkList = new ArrayList<Integer>();
+    ArrayList<View> viewList = new ArrayList<View>();
     String today_date = AddItem.getToday();
-<<<<<<< HEAD
     LayoutInflater inflater;
     View view_alarm_display;
-=======
->>>>>>> master
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,9 +60,8 @@ public class Alarm extends Activity {
         //helper.close();
 
         initView();
-        showTime();
-        //setAlarm(13, 3, RC);
-        btnNewAlarm.setOnClickListener(new Button.OnClickListener(){
+        showTime(write_db);
+        fabNewAlarm.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
                 final Calendar c = Calendar.getInstance();
@@ -80,18 +77,42 @@ public class Alarm extends Activity {
                             timeStr = hourOfDay + ":" + minute;
                         helper.insertInfo(write_db, timeStr, 1, today_date, null, null);
                         updateIDList();
-                        setAlarm(hourOfDay, minute, alarmIDList.get(alarmIDList.size()-1));
-                        //arrAdap.notifyDataSetChanged();
-                        LLV.removeView(view_alarm_display);
+                        Log.d("ID List size", alarmIDList.size() + "");
+                        alarmTimeList.add(timeStr);
+                        final int id = alarmIDList.get(alarmIDList.size()-1);
+                        //setAlarm(hourOfDay, minute, alarmIDList.get(alarmIDList.size()-1));
+                        view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
+                        viewList.add(view_alarm_display);
+                        tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
+                        swAlarm = (Switch) view_alarm_display.findViewById(R.id.swAlarm);
+                        LLV_display = (LinearLayout) view_alarm_display.findViewById(R.id.LLV_display);
                         tvAlarmTime.setText(timeStr);
+                        swAlarm.setChecked(true);
+                        final String fTimeStr = timeStr;
                         tvAlarmTime.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 Intent intent = new Intent(Alarm.this,AlarmSetting.class);
                                 Bundle bundle = new Bundle();
-                                bundle.putString("time", tvAlarmTime.getText().toString());
+                                bundle.putString("time", fTimeStr);
+                                bundle.putInt("ID", id);
                                 intent.putExtras(bundle);
                                 startActivity(intent);
+                            }
+                        });
+
+                        tvAlarmTime.setOnLongClickListener(new View.OnLongClickListener() {
+                            @Override
+                            public boolean onLongClick(View v) {
+                                try
+                                {
+                                    showAlertDialog(write_db, fTimeStr, id);
+                                }catch(Exception e)
+                                {
+                                    Log.d("TextView Long click", "error");
+                                    return false;
+                                }
+                                return false;
                             }
                         });
                         LLV.addView(view_alarm_display);
@@ -99,81 +120,20 @@ public class Alarm extends Activity {
                 }, hour, min, false).show();
             }
         });
-
-        /*
-        arrAdap = new ArrayAdapter(Alarm.this,
-                android.R.layout.select_dialog_item,
-                alarmTimeList);
-        alarmList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        alarmList.setAdapter(arrAdap);
-
-        alarmList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                new AlertDialog.Builder(Alarm.this)
-                        .setTitle("Want to delele?")
-                        .setMessage("Want to delete alarm " + alarmTimeList.get(position))
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                helper.remove_Time(write_db, alarmIDList.get(position));
-                                cancelAlarm(alarmIDList.get(position));
-                                alarmTimeList.remove(position);
-                                alarmIDList.remove(position);
-                                arrAdap.notifyDataSetChanged();
-                                //Log.d("AlarmTimeList Size : ", alarmTimeList.size() + "");
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        })
-                        .show();
-                return true;
-            }
-        });
-
-        alarmList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                int hour = Integer.parseInt(alarmTimeList.get(position).split(":")[0]);
-                int min = Integer.parseInt(alarmTimeList.get(position).split(":")[1]);
-                new TimePickerDialog(Alarm.this, new TimePickerDialog.OnTimeSetListener(){
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        String timeStr = "";
-                        if (minute < 10)
-                            timeStr = hourOfDay + ":0" + minute;
-                        else
-                            timeStr = hourOfDay + ":" + minute;
-                        helper.updateTimeInfo(write_db, alarmIDList.get(position),timeStr, 1, today_date, null, null);
-                        cancelAlarm(alarmIDList.get(position));
-                        setAlarm(hourOfDay, minute, alarmIDList.get(position));
-                        alarmTimeList.set(position, timeStr);
-                        arrAdap.notifyDataSetChanged();
-                        //for (int i = 0; i < alarmTimeList.size(); i++)
-                        //Log.d("AlarmTimeList : ", alarmTimeList.get(i) + "");
-                    }
-                }, hour, min, false).show();
-            }
-        });
-        */
     }
 
     private void initView() {
         inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        btnNewAlarm = (Button)findViewById(R.id.btnNewAlarm);
-        //alarmList = (ListView)findViewById(R.id.alarmList);
+        fabNewAlarm = (FloatingActionButton)findViewById(R.id.fabNewAlarm);
         LLV = (LinearLayout)findViewById(R.id.LLV);
     }
 
-    private void showTime() {
+    private void showTime(final SQLiteDatabase write_db) {
         cursor = helper.getInfo(helper.getReadableDatabase());
         alarmTimeList.clear();
         alarmIDList.clear();
+        viewList.clear();
         if (cursor != null) {
             cursor.moveToFirst();
             //Log.d("getCount() ", cursor.getCount() + "");
@@ -186,27 +146,40 @@ public class Alarm extends Activity {
                 Log.d("TIME ", time);
                 Log.d("CHECK ", check + "");
                 Log.d("DATE ", date + "");
-                tvAlarmTime = new TextView(getBaseContext());
                 view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
+                viewList.add(view_alarm_display);
                 tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
                 swAlarm = (Switch) view_alarm_display.findViewById(R.id.swAlarm);
-                LLH = (LinearLayout) view_alarm_display.findViewById(R.id.LLH);
-                tvID = (TextView) view_alarm_display.findViewById(R.id.tvID);
+                LLV_display = (LinearLayout) view_alarm_display.findViewById(R.id.LLV_display);
                 tvAlarmTime.setText(time);
-                tvID.setText(id + "");
+                LLV.addView(view_alarm_display);
                 tvAlarmTime.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(Alarm.this,AlarmSetting.class);
                         Bundle bundle = new Bundle();
-
                         bundle.putString("time", time);
                         bundle.putInt("ID", id);
                         intent.putExtras(bundle);
                         startActivity(intent);
                     }
                 });
-                LLV.addView(view_alarm_display);
+
+                tvAlarmTime.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        try
+                        {
+                            showAlertDialog(write_db, time, id);
+                        }catch(Exception e)
+                        {
+                            Log.d("TextView Long click", "error");
+                            return false;
+                        }
+                        return false;
+                    }
+                });
+
                 if (check == 1) {
                     alarmTimeList.add(time);
                     alarmIDList.add(id);
@@ -219,6 +192,7 @@ public class Alarm extends Activity {
     }
 
     void updateIDList() {
+        cursor = helper.getInfo(helper.getReadableDatabase());
         alarmIDList.clear();
         if (cursor != null) {
             cursor.moveToFirst();
@@ -228,6 +202,32 @@ public class Alarm extends Activity {
                 cursor.moveToNext();
             }
         }
+    }
+
+    void showAlertDialog(final SQLiteDatabase db, String timeStr, final int id) {
+        new AlertDialog.Builder(Alarm.this)
+            .setTitle("Want to delele?")
+            .setMessage("Want to delete alarm " + timeStr)
+            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    helper.remove_Time(db, id);
+                    cancelAlarm(id);
+                    int idx = alarmIDList.indexOf(id);
+                    Log.d("ID index", idx + "");
+                    LLV.removeView(viewList.get(idx));
+                    viewList.remove(idx);
+                    alarmTimeList.remove(idx);
+                    alarmIDList.remove(idx);
+                }
+            })
+            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            })
+            .show();
     }
 
     void setAlarm(int hour, int min, int RC) {
@@ -247,7 +247,6 @@ public class Alarm extends Activity {
         Intent intent = new Intent(Alarm.this, AlarmReceiver.class);
         alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
         alarmIntent = PendingIntent.getBroadcast(Alarm.this, RC, intent, FLAG_ONE_SHOT);
-
         alarmManager.cancel(alarmIntent);
         alarmIntent = null;
     }

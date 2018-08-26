@@ -3,19 +3,58 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".AlarmSetting">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:background="@color/colorPrimary"
+                android:text="@string/back"
+                android:textColor="@android:color/background_light"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/tvAlarmSetting"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="2.5"
+                android:background="@color/colorPrimaryLight"
+                android:gravity="center"
+                android:text="@string/alarm_setting"
+                android:textAlignment="center"
+                android:textColor="@android:color/background_light"
+                android:textSize="30sp" />
+
+            <Button
+                android:id="@+id/btnDetermine"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:background="@color/colorPrimary"
+                android:text="@string/determine"
+                android:textColor="@android:color/background_light"
+                android:textSize="24sp" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/tvDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/holo_blue_dark"
             android:text="@string/date"
+            android:textColor="@android:color/background_light"
             android:textSize="30sp" />
 
         <TextView
@@ -25,11 +64,18 @@
             android:text="@string/date"
             android:textSize="30sp" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="#FF000000" />
+
         <TextView
             android:id="@+id/tvTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/time"
+            android:background="@color/holo_blue_dark"
+            android:textColor="@android:color/background_light"
             android:textSize="30sp" />
 
         <TextView
@@ -39,11 +85,18 @@
             android:text="@string/time"
             android:textSize="30sp" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="#FF000000" />
+
         <TextView
             android:id="@+id/tvSound"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/sound"
+            android:background="@color/holo_blue_dark"
+            android:textColor="@android:color/background_light"
             android:textSize="30sp" />
 
         <TextView
