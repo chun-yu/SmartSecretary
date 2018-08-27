@@ -6,7 +6,12 @@ import android.app.TimePickerDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -21,7 +26,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+import android.util.Log;
+import com.googlecode.tesseract.android.TessBaseAPI;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -29,16 +40,31 @@ import java.util.Calendar;
 public class AddItem extends Activity {
     private Button back_btn,date_view,finish_add_item,btn_clock,btn_clock_view,phoho_btn,voice_btn;
     private Switch alarm_switch;
+    private static final String TAG = AddItem.class.getSimpleName();
+    public static final String TESS_DATA = "/tessdata";
+    private TextView scrollView1;
+    private TessBaseAPI tessbaseAPI;
+    private Uri outputfileDir;
+    private static final String DATA_PATH = Environment.getExternalStorageDirectory().toString()+"/Tess";
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
     private static SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm");
     private TextInputLayout title_layout,content_layout ;
     private TextInputEditText title_text,content_text;
     private DBHelper helper = null;
+
     protected static final int RESULT_SPEECH = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_item);
+        scrollView1 = (TextView) this.findViewById(R.id.scrollView1);
+        this.findViewById(R.id.photo_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startCameraActivity();
+            }
+        });
         helper = new DBHelper(this);
         voice_btn = (Button) findViewById(R.id.voice_btn);
         voice_btn.setOnClickListener(new Button.OnClickListener() {
@@ -104,6 +130,82 @@ public class AddItem extends Activity {
                 check_if_null();
             }
         });
+    }
+    private void startCameraActivity(){
+        try{
+            String imagePath = DATA_PATH + "/imgs";
+            File dir = new File(imagePath);
+            if(!dir.exists()){
+                dir.mkdir();
+            }
+            String imageFilePath = imagePath + "/ocr.jpg";
+            outputfileDir = Uri.fromFile(new File(imageFilePath));
+            final Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,outputfileDir);
+            if(pictureIntent.resolveActivity(getPackageManager()) != null){
+                startActivityForResult(pictureIntent,100);
+            }
+        }catch(Exception e){
+            Log.e(TAG,e.getMessage());
+        }
+    }
+
+
+    private void startOCR(Uri outputfileDir){
+        try{
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 7;
+            Bitmap bitmap = BitmapFactory.decodeFile(outputfileDir.getPath(),options);
+            String result = this.getText(bitmap);
+            scrollView1.setText(result);
+        }catch (Exception e){
+            Log.e(TAG,e.getMessage());
+        }
+    }
+
+    private void prepareTessData(){
+        try{
+            File dir = new File(DATA_PATH + TESS_DATA);
+            if(!dir.exists()){
+                dir.mkdir();
+            }
+            String fileList[] = getAssets().list("");
+            for(String fileName : fileList){
+                String pathToDataFile = DATA_PATH + TESS_DATA + "/" + fileName;
+                if(!(new File(pathToDataFile)).exists()){
+                    InputStream in = getAssets().open(fileName);
+                    OutputStream out = new FileOutputStream(pathToDataFile);
+                    byte[] buff = new byte[1024];
+                    int len;
+                    while ((len = in.read(buff))>0){
+                        out.write(buff,0,len);
+                    }
+                    in.close();
+                    out.close();
+                }
+            }
+        }catch (Exception e){
+            Log.e(TAG,e.getMessage());
+        }
+    }
+
+
+    private String getText(Bitmap bitmap) {
+        try{
+            tessbaseAPI = new TessBaseAPI();
+        }catch (Exception e){
+            Log.e(TAG,e.getMessage());
+        }
+        tessbaseAPI.init(DATA_PATH,"chi_tra");
+        tessbaseAPI.setImage(bitmap);
+        String retStr = "No result";
+        try{
+            retStr = tessbaseAPI.getUTF8Text();
+        }catch(Exception e){
+            Log.e(TAG,e.getMessage());
+        }
+        tessbaseAPI.end();
+        return retStr;
     }
 
     public void showDatePickerDialog() {
@@ -190,6 +292,10 @@ public class AddItem extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
             super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 100 && resultCode == Activity.RESULT_OK){
+            prepareTessData();
+            startOCR(outputfileDir);
+        }else Toast.makeText(getApplicationContext(), "Image problem", Toast.LENGTH_SHORT).show();
             switch (requestCode) {
                 case RESULT_SPEECH: {
                     if (resultCode == RESULT_OK && null != data) {
