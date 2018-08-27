@@ -36,6 +36,8 @@ public class AlarmSetting extends Activity {
         final String time =  bundle.getString("time");
         final int id = bundle.getInt("ID");
 
+        timeStr = time;
+
         Log.d("time", time);
         Log.d("ID", id + "");
 

@@ -19,11 +19,13 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
@@ -46,6 +48,8 @@ public class Alarm extends Activity {
     ArrayList<Integer> alarmIDList = new ArrayList<Integer>();
     ArrayList<Integer> checkList = new ArrayList<Integer>();
     ArrayList<View> viewList = new ArrayList<View>();
+    ArrayList<TextView> tvList = new ArrayList<TextView>();
+    ArrayList<Switch> switchList = new ArrayList<Switch>();
     String today_date = AddItem.getToday();
     LayoutInflater inflater;
     View view_alarm_display;
@@ -79,42 +83,19 @@ public class Alarm extends Activity {
                         updateIDList();
                         Log.d("ID List size", alarmIDList.size() + "");
                         alarmTimeList.add(timeStr);
+                        checkList.add(1);
                         final int id = alarmIDList.get(alarmIDList.size()-1);
                         //setAlarm(hourOfDay, minute, alarmIDList.get(alarmIDList.size()-1));
                         view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
                         viewList.add(view_alarm_display);
                         tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
+                        tvList.add(tvAlarmTime);
                         swAlarm = (Switch) view_alarm_display.findViewById(R.id.swAlarm);
+                        switchList.add(swAlarm);
                         LLV_display = (LinearLayout) view_alarm_display.findViewById(R.id.LLV_display);
                         tvAlarmTime.setText(timeStr);
                         swAlarm.setChecked(true);
-                        final String fTimeStr = timeStr;
-                        tvAlarmTime.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = new Intent(Alarm.this,AlarmSetting.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putString("time", fTimeStr);
-                                bundle.putInt("ID", id);
-                                intent.putExtras(bundle);
-                                startActivity(intent);
-                            }
-                        });
-
-                        tvAlarmTime.setOnLongClickListener(new View.OnLongClickListener() {
-                            @Override
-                            public boolean onLongClick(View v) {
-                                try
-                                {
-                                    showAlertDialog(write_db, fTimeStr, id);
-                                }catch(Exception e)
-                                {
-                                    Log.d("TextView Long click", "error");
-                                    return false;
-                                }
-                                return false;
-                            }
-                        });
+                        setListener(write_db, swAlarm, tvAlarmTime, alarmIDList.size()-1);
                         LLV.addView(view_alarm_display);
                     }
                 }, hour, min, false).show();
@@ -129,11 +110,54 @@ public class Alarm extends Activity {
         LLV = (LinearLayout)findViewById(R.id.LLV);
     }
 
+    private void setListener(final SQLiteDatabase db, Switch sw, TextView tv, final int index) {
+        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if (compoundButton.isChecked()) {
+                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, today_date, null, null);
+                }
+                else {
+                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 0, today_date, null, null);
+                }
+            }
+        });
+
+        tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Alarm.this,AlarmSetting.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("time", alarmTimeList.get(index));
+                bundle.putInt("ID", alarmIDList.get(index));
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
+        tv.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                try
+                {
+                    showAlertDialog(db, tvList.get(index).getText().toString(), alarmIDList.get(index));
+                }catch(Exception e)
+                {
+                    Log.d("TextView Long click", "error");
+                    return false;
+                }
+                return false;
+            }
+        });
+    }
+
     private void showTime(final SQLiteDatabase write_db) {
         cursor = helper.getInfo(helper.getReadableDatabase());
         alarmTimeList.clear();
         alarmIDList.clear();
         viewList.clear();
+        switchList.clear();
+        tvList.clear();
+        checkList.clear();
         if (cursor != null) {
             cursor.moveToFirst();
             //Log.d("getCount() ", cursor.getCount() + "");
@@ -148,41 +172,20 @@ public class Alarm extends Activity {
                 Log.d("DATE ", date + "");
                 view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
                 viewList.add(view_alarm_display);
+                alarmTimeList.add(time);
+                alarmIDList.add(id);
+                checkList.add(check);
                 tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
+                tvList.add(tvAlarmTime);
                 swAlarm = (Switch) view_alarm_display.findViewById(R.id.swAlarm);
+                switchList.add(swAlarm);
                 LLV_display = (LinearLayout) view_alarm_display.findViewById(R.id.LLV_display);
                 tvAlarmTime.setText(time);
                 LLV.addView(view_alarm_display);
-                tvAlarmTime.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(Alarm.this,AlarmSetting.class);
-                        Bundle bundle = new Bundle();
-                        bundle.putString("time", time);
-                        bundle.putInt("ID", id);
-                        intent.putExtras(bundle);
-                        startActivity(intent);
-                    }
-                });
 
-                tvAlarmTime.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        try
-                        {
-                            showAlertDialog(write_db, time, id);
-                        }catch(Exception e)
-                        {
-                            Log.d("TextView Long click", "error");
-                            return false;
-                        }
-                        return false;
-                    }
-                });
+                setListener(write_db, swAlarm, tvAlarmTime, i);
 
                 if (check == 1) {
-                    alarmTimeList.add(time);
-                    alarmIDList.add(id);
                     swAlarm.setChecked(true);
                 }
                 cursor.moveToNext();
@@ -214,17 +217,29 @@ public class Alarm extends Activity {
                     helper.remove_Time(db, id);
                     cancelAlarm(id);
                     int idx = alarmIDList.indexOf(id);
+                    Log.d("ID", id + "");
                     Log.d("ID index", idx + "");
+                    //Log.d("viewList", viewList.get(idx) + "");
+                    Log.d("checkList", checkList.get(idx) + "");
+                    //Log.d("switchList", switchList.get(idx) + "");
+                    //Log.d("tvList", tvList.get(idx) + "");
+                    Log.d("alarmTimeList", alarmTimeList.get(idx) + "");
+                    Log.d("alarmIDList", alarmIDList.get(idx) + "");
                     LLV.removeView(viewList.get(idx));
                     viewList.remove(idx);
+                    checkList.remove(idx);
+                    switchList.remove(idx);
+                    tvList.remove(idx);
                     alarmTimeList.remove(idx);
                     alarmIDList.remove(idx);
+                    for (int i = idx; i < alarmIDList.size(); i++) {
+                        setListener(db, switchList.get(i), tvList.get(i), idx);
+                    }
                 }
             })
             .setNegativeButton("No", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-
                 }
             })
             .show();
