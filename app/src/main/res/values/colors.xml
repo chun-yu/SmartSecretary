@@ -9,7 +9,8 @@
     <color name="holo_blue_dark">#0081ac</color>
     <color name="trans_holo_blue_dark">#aa0088cc</color>
     <color name="little_holo_blue_dark">#330088cc</color>
-    <color name="gray">#998a8a8a</color>
+    <color name="light_gray">#998a8a8a</color>
+    <color name="gray">#e0dddddd</color>
     <color name="red">#ff0000</color>
     <color name="trans_red">#33ff2222</color>
     <color name="orange">#f7df2d</color>
