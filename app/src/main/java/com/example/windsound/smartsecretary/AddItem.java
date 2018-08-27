@@ -42,7 +42,6 @@ public class AddItem extends Activity {
     private Switch alarm_switch;
     private static final String TAG = AddItem.class.getSimpleName();
     public static final String TESS_DATA = "/tessdata";
-    private TextView scrollView1;
     private TessBaseAPI tessbaseAPI;
     private Uri outputfileDir;
     private static final String DATA_PATH = Environment.getExternalStorageDirectory().toString()+"/Tess";
@@ -58,7 +57,6 @@ public class AddItem extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_item);
-        scrollView1 = (TextView) this.findViewById(R.id.scrollView1);
         this.findViewById(R.id.photo_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -157,7 +155,7 @@ public class AddItem extends Activity {
             options.inSampleSize = 7;
             Bitmap bitmap = BitmapFactory.decodeFile(outputfileDir.getPath(),options);
             String result = this.getText(bitmap);
-            scrollView1.setText(result);
+            content_text.setText(result);
         }catch (Exception e){
             Log.e(TAG,e.getMessage());
         }
