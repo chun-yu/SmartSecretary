@@ -74,7 +74,7 @@
                     android:id="@+id/title_text_article"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/please_title"
+                    android:hint="@string/title"
                     android:theme="@style/MyEditText"
                     android:textSize="30dp"/>
                 </android.support.design.widget.TextInputLayout>
