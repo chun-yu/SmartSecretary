@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class AddItem extends Activity {
-    private Button back_btn,date_view,finish_add_item,btn_clock,btn_clock_view,phoho_btn,voice_btn;
+    private Button back_btn,date_view,finish_add_item,btn_clock,btn_clock_view,photo_btn,voice_btn;
     private Switch alarm_switch;
     private static final String TAG = AddItem.class.getSimpleName();             //從這邊往下數五行       應該是要找路徑可是我不知道有沒有寫對
     public static final String TESS_DATA = "/tessdata";

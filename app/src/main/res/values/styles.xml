@@ -40,4 +40,10 @@
     <style name="MyOverflowText" parent="TextAppearance.AppCompat.Small">
         <item name="android:textColor">@color/orange</item>
     </style>
+    <!--Floating window style-->
+    <style name="AnimationFade">
+        <!-- PopupWindow 左右弹出的效果-->
+        <item name="android:windowEnterAnimation">@anim/in_lefttoright</item>
+        <item name="android:windowExitAnimation">@anim/out_righttoleft</item>
+    </style>
 </resources>

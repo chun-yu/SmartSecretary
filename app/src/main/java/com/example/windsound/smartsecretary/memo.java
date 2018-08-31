@@ -296,7 +296,8 @@ public class memo extends Activity {
             final TextInputEditText content_text_article = (TextInputEditText) popWindow_view.findViewById(R.id.content_text_article);
             FrameLayout.LayoutParams para = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,FrameLayout.LayoutParams.FILL_PARENT);
             popWindow_view.setLayoutParams(para);
-            popupWindow = new PopupWindow(popWindow_view,1000,1600, true);
+            popupWindow = new PopupWindow(popWindow_view,1000,1500, true);
+            popupWindow.setAnimationStyle(R.style.AnimationFade);
             popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
             popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
             popupWindow.showAtLocation(v, Gravity.CENTER,0,0);
