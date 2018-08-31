@@ -5,6 +5,7 @@
     <uses-feature android:name="android.hardware.camera2" android:required="true"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,19 +21,27 @@
             </intent-filter>
         </activity>
         <activity android:name=".Alarm" />
-        <activity android:name=".AddItem"
+        <activity
+            android:name=".AddItem"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden"></activity>
+            android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
             android:name=".memo"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden"></activity>
+            android:windowSoftInputMode="adjustPan|stateHidden" />
 
-        <receiver android:name=".AlarmReceiver"></receiver>
         <receiver android:name=".AlarmReceiver" />
+        <receiver android:name=".BootReceiver"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
         <activity android:name=".AlarmSetting"></activity>
 
+
+        <activity android:name=".AlarmWake"></activity>
 
     </application>
 

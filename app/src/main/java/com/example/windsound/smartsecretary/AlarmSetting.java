@@ -1,6 +1,7 @@
 package com.example.windsound.smartsecretary;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -9,19 +10,21 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
+import java.util.Calendar;
+
 public class AlarmSetting extends Activity {
 
     TextView tvAlarmDate, _tvAlarmTime, tvAlarmSound;
     Button btnBack, btnDetermine;
     private DBHelper helper = null;
-    String today_date = AddItem.getToday();
-    String timeStr = "";
+    String time = "", date = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,15 +36,27 @@ public class AlarmSetting extends Activity {
 
         initView();
         Bundle bundle = this.getIntent().getExtras();
-        final String time =  bundle.getString("time");
-        final int id = bundle.getInt("ID");
+        final int index = bundle.getInt("index");
 
-        timeStr = time;
-
-        Log.d("time", time);
-        Log.d("ID", id + "");
-
-        tvAlarmDate.setText(today_date);
+        date = Alarm.alarmDateList.get(index);
+        tvAlarmDate.setText(date);
+        tvAlarmDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Calendar c = Calendar.getInstance();
+                int year = Integer.parseInt(date.split("/")[0]);
+                int month = Integer.parseInt(date.split("/")[1]);
+                int day = Integer.parseInt(date.split("/")[2]);
+                new DatePickerDialog(AlarmSetting.this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int day) {
+                        date = year + "/" + (month+1) + "/" + day;
+                        tvAlarmDate.setText(date);
+                    }
+                }, year, month-1, day).show();
+            }
+        });
+        time = Alarm.alarmTimeList.get(index);
         _tvAlarmTime.setText(time);
         _tvAlarmTime.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,10 +67,12 @@ public class AlarmSetting extends Activity {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                         if (minute < 10)
-                            timeStr = hourOfDay + ":0" + minute;
+                            time = hourOfDay + ":0" + minute;
                         else
-                            timeStr = hourOfDay + ":" + minute;
-                        _tvAlarmTime.setText(timeStr);
+                            time = hourOfDay + ":" + minute;
+                        if (hourOfDay < 10)
+                            time = "0" + time;
+                        _tvAlarmTime.setText(time);
                     }
                 }, hour, min, false).show();
             }
@@ -70,9 +87,12 @@ public class AlarmSetting extends Activity {
         btnDetermine.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
-                helper.updateTimeInfo(write_db, id, timeStr, 1, today_date, null, null);
-                Toast.makeText(AlarmSetting.this, "時間已修改為 : " + timeStr, Toast.LENGTH_SHORT).show();
+                helper.updateTimeInfo(write_db, Alarm.alarmIDList.get(index), time, 1, date, null, null);
+                Toast.makeText(AlarmSetting.this, "時間已修改為 " + time, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(AlarmSetting.this,Alarm.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt("index", index);
+                intent.putExtras(bundle);
                 startActivity(intent);
             }
         });
