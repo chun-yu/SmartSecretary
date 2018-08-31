@@ -1,13 +1,24 @@
 package com.example.windsound.smartsecretary;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.TextInputEditText;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +34,7 @@ public class memo extends Activity {
     private ImageButton search_btn;
     private LinearLayout memo_show;
     private Cursor res;
+    PopupWindow popupWindow;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 
     @Override
@@ -140,7 +152,7 @@ public class memo extends Activity {
             res = helper.getInfoData();
             while (res.moveToNext()) {
                 if (big_idarrary.get(i) == res.getInt(0)) {
-                    add_table_show(getResources().getColor(R.color.little_holo_blue_dark),res.getString(3), res.getString(4), res.getString(1),res.getInt(2));
+                    add_table_show(res.getInt(0),getResources().getColor(R.color.little_holo_blue_dark),res.getString(3), res.getString(4), res.getString(1),res.getInt(2),res.getString(5));
                 }
             }
         }
@@ -148,14 +160,16 @@ public class memo extends Activity {
             res = helper.getInfoData();
             while (res.moveToNext()) {
                 if (small_idarrary.get(i) == res.getInt(0)) {
-                    add_table_show(getResources().getColor(R.color.trans_red),res.getString(3), res.getString(4), res.getString(1),res.getInt(2));
+                    add_table_show(res.getInt(0),getResources().getColor(R.color.trans_red),res.getString(3), res.getString(4), res.getString(1),res.getInt(2),res.getString(5));
                 }
             }
         }
     }
-    private void add_table_show(int color,String _datee, String _title,String _time,  int _check) {
-        final String date = _datee;
+    private void add_table_show(int _article_id, int color,String _date, String _title, String _time,int _check,String _note) {
+        final int article_id = _article_id;
+        final String date = _date;
         final String title = _title;
+        final String note = _note;
         final String time = _time;
         final int check = _check;
         final LinearLayout tr = new LinearLayout(this);
@@ -165,6 +179,7 @@ public class memo extends Activity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(memo.this, title + "     時間 :" + time , Toast.LENGTH_SHORT).show();
+                PopArticle(view,article_id,time,check,date,title,note);
             }
         });
 
@@ -227,7 +242,7 @@ public class memo extends Activity {
         tr.addView(ttr2);
 
         final LinearLayout space = new LinearLayout(this);
-        space.setBackgroundColor(getResources().getColor(R.color.gray));
+        space.setBackgroundColor(getResources().getColor(R.color.light_gray));
         LinearLayout.LayoutParams  params2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,10);
         params2.setMargins(30,0,30,0);
         space.setLayoutParams(params2);
@@ -264,6 +279,85 @@ public class memo extends Activity {
                 return getString(R.string.unknow);
             default:
                 return getString(R.string.unknow);
+        }
+    }
+
+    private  void PopArticle(View v,final int _article_id,String _time,int _check,String _date,String _title,String _note){
+        final String date = _date;
+        final String time = _time;
+        final String title = _title;
+        final String note = _note;
+        final int check = _check;
+            View popWindow_view = getLayoutInflater().inflate(R.layout.article_display,null);
+            final Button article_date = (Button) popWindow_view.findViewById(R.id.article_date);
+            final Button article_time = (Button) popWindow_view.findViewById(R.id.article_time);
+            final Button article_close = (Button) popWindow_view.findViewById(R.id.article_close);
+            final TextInputEditText title_text_article = (TextInputEditText) popWindow_view.findViewById(R.id.title_text_article);
+            final TextInputEditText content_text_article = (TextInputEditText) popWindow_view.findViewById(R.id.content_text_article);
+            FrameLayout.LayoutParams para = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,FrameLayout.LayoutParams.FILL_PARENT);
+            popWindow_view.setLayoutParams(para);
+            popupWindow = new PopupWindow(popWindow_view,1000,1500, true);
+            popupWindow.setAnimationStyle(R.style.AnimationFade);
+            popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+            popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+            popupWindow.showAtLocation(v, Gravity.CENTER,0,0);
+            article_date.setText(date);
+            article_time.setText(time);
+            title_text_article.setText(title);
+            content_text_article.setText(note);
+
+            article_close.setOnClickListener( new View.OnClickListener(){
+                public void onClick (View v){
+                    String s1 = title_text_article.getText().toString();
+                    String s2 = content_text_article.getText().toString();
+                    String time2 = article_time.getText().toString();
+                    String date2 = article_date.getText().toString();
+                    check_update_correct(_article_id,s1,s2,check,time2,date2);
+                }
+            });
+            article_date.setOnClickListener( new View.OnClickListener(){
+                public void onClick (View v){
+                }
+            });
+            article_time.setOnClickListener( new View.OnClickListener(){
+                public void onClick (View v){
+                }
+            });
+    }
+    private void check_update_correct(int id,String s1,String s2,int check,String time,String date){
+        final SQLiteDatabase write_db = helper.getWritableDatabase();
+        if(s1.equals("") && !s2.equals("")){
+            Toast.makeText(memo.this,getString(R.string.please_title), Toast.LENGTH_LONG).show();
+        }else if(!s1.equals("") && s2.equals("")){
+            Toast.makeText(memo.this,getString(R.string.content), Toast.LENGTH_LONG).show();
+        }else if(s1.equals("") && s2.equals("")){
+            Toast.makeText(memo.this,getString(R.string.please_title)+"\n"+getString(R.string.content), Toast.LENGTH_LONG).show();
+        }else{
+            if(s1.length()>10 || s2.length()>150){
+                Toast.makeText(memo.this,getString(R.string.input_outline)+"\n"+getString(R.string.content), Toast.LENGTH_LONG).show();
+            }else {
+                if (check > 0) {
+                    Toast toast = Toast.makeText(memo.this, s1 + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    helper.updateTimeInfo(write_db, id, time, 1, date, s1, s2);
+                    popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+                    popupWindow.dismiss();
+                    InputMethodManager inputMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMgr.toggleSoftInput(InputMethodManager.HIDE_NOT_ALWAYS, 0);
+                    show_memo_to_click();
+                } else {
+                    Toast toast = Toast.makeText(memo.this, s1 + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    helper.updateTimeInfo(write_db, id, time, 0, date, s1, s2);
+                    popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+                    popupWindow.dismiss();
+                    InputMethodManager inputMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMgr.toggleSoftInput(InputMethodManager.HIDE_NOT_ALWAYS, 0);
+                    show_memo_to_click();
+                }
+            }
         }
     }
 }

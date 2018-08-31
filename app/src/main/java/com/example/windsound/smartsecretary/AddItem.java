@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.audiofx.EnvironmentalReverb;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -23,6 +24,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.Switch;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -38,13 +40,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class AddItem extends Activity {
-    private Button back_btn,date_view,finish_add_item,btn_clock,btn_clock_view,phoho_btn,voice_btn;
+    private Button back_btn,date_view,finish_add_item,btn_clock,btn_clock_view,photo_btn,voice_btn;
     private Switch alarm_switch;
-    private static final String TAG = AddItem.class.getSimpleName();
+    private static final String TAG = AddItem.class.getSimpleName();             //從這邊往下數五行       應該是要找路徑可是我不知道有沒有寫對
     public static final String TESS_DATA = "/tessdata";
     private TessBaseAPI tessbaseAPI;
     private Uri outputfileDir;
-    private static final String DATA_PATH = Environment.getExternalStorageDirectory().toString()+"/Tess";
+    private static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() + "/Tess";
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
     private static SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm");
     private TextInputLayout title_layout,content_layout ;
@@ -59,7 +61,7 @@ public class AddItem extends Activity {
         setContentView(R.layout.add_item);
         this.findViewById(R.id.photo_btn).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view) {            //按button開啟相機
                 startCameraActivity();
             }
         });
@@ -69,11 +71,11 @@ public class AddItem extends Activity {
             public void onClick(View v) {
                 Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, "en-US");
-                    try { startActivityForResult(intent, RESULT_SPEECH);
-                        content_text.setText("");
-                    } catch (ActivityNotFoundException a) {
-                        Toast.makeText(getApplicationContext(),"Opps! Your device doesn't support Speech to Text", Toast.LENGTH_SHORT).show();
-                    }
+                try { startActivityForResult(intent, RESULT_SPEECH);
+                    content_text.setText("");
+                } catch (ActivityNotFoundException a) {
+                    Toast.makeText(getApplicationContext(),"Opps! Your device doesn't support Speech to Text", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         back_btn = (Button) findViewById(R.id.back_btn);
@@ -120,7 +122,7 @@ public class AddItem extends Activity {
         title_text = (TextInputEditText) findViewById(R.id.title_text);
         title_text.addTextChangedListener(mTextWatcher);
         content_layout= (TextInputLayout) findViewById(R.id.content_layout);
-        content_text = (TextInputEditText) findViewById(R.id.content_text);
+        content_text = (TextInputEditText) findViewById(R.id.content_text);                     //找ID
         content_text.addTextChangedListener(mTextWatcher);
         finish_add_item = (Button) findViewById(R.id.finish_add_item);
         finish_add_item.setOnClickListener(new Button.OnClickListener() {
@@ -129,7 +131,7 @@ public class AddItem extends Activity {
             }
         });
     }
-    private void startCameraActivity(){
+    private void startCameraActivity(){                                         //相機        "/imgs"是不確定的用法
         try{
             String imagePath = DATA_PATH + "/imgs";
             File dir = new File(imagePath);
@@ -147,6 +149,7 @@ public class AddItem extends Activity {
             Log.e(TAG,e.getMessage());
         }
     }
+<<<<<<< HEAD
 
 
     private void startOCR(Uri outputfileDir){
@@ -158,10 +161,29 @@ public class AddItem extends Activity {
             content_text.setText(result);
         }catch (Exception e){
             Log.e(TAG,e.getMessage());
+=======
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == 100 && resultCode == Activity.RESULT_OK){                 //從這邊開始
+            prepareTessData();
+            startOCR(outputfileDir);
+        }else Toast.makeText(getApplicationContext(), "Image problem", Toast.LENGTH_SHORT).show();   //到這邊
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case RESULT_SPEECH: {
+                if (resultCode == RESULT_OK && null != data) {
+                    ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    content_text.setText(text.get(0));
+                }
+                break;
+            }
+>>>>>>> master
         }
     }
 
-    private void prepareTessData(){
+
+
+    private void prepareTessData(){                                             //一樣不確定路徑有沒有抓到
         try{
             File dir = new File(DATA_PATH + TESS_DATA);
             if(!dir.exists()){
@@ -187,14 +209,26 @@ public class AddItem extends Activity {
         }
     }
 
+    private void startOCR(Uri imageUri){                                                //OCR
+        try{
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 7;
+            Bitmap bitmap = BitmapFactory.decodeFile(imageUri.getPath(),options);
+            String result = this.getText(bitmap);
+            content_text.setText(result);                                               //這行不確定有沒有打對
+        }catch (Exception e){
+            Log.e(TAG,e.getMessage());
+        }
+    }
 
-    private String getText(Bitmap bitmap) {
+
+    private String getText(Bitmap bitmap) {                                         //最後的部分
         try{
             tessbaseAPI = new TessBaseAPI();
         }catch (Exception e){
             Log.e(TAG,e.getMessage());
         }
-        tessbaseAPI.init(DATA_PATH,"chi_tra");
+        tessbaseAPI.init(DATA_PATH,"chi_tra");                                  //這行應該是抓中文辨識吧?
         tessbaseAPI.setImage(bitmap);
         String retStr = "No result";
         try{
@@ -287,23 +321,7 @@ public class AddItem extends Activity {
     protected void onResume() {
         super.onResume();
     }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-            super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 100 && resultCode == Activity.RESULT_OK){
-            prepareTessData();
-            startOCR(outputfileDir);
-        }else Toast.makeText(getApplicationContext(), "Image problem", Toast.LENGTH_SHORT).show();
-            switch (requestCode) {
-                case RESULT_SPEECH: {
-                    if (resultCode == RESULT_OK && null != data) {
-                    ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                        content_text.setText(text.get(0));
-                    }
-                break;
-                }
-            }
-    }
+
 
     private void check_if_null(){
         final SQLiteDatabase write_db = helper.getWritableDatabase();
