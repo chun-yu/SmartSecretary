@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -101,7 +102,7 @@ public class AddItem extends Activity {
         date_view.setText(getToday());
         date_view.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                showDatePickerDialog();
+                showDatePickerDialog(date_view,AddItem.this);
             }
         });
 
@@ -110,12 +111,12 @@ public class AddItem extends Activity {
         btn_clock_view.setText(getNewTime());
         btn_clock_view.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                showTimePickerDialog();
+                showTimePickerDialog(btn_clock_view,AddItem.this);
             }
         });
         btn_clock.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                showTimePickerDialog();
+                showTimePickerDialog(btn_clock_view,AddItem.this);
             }
         });
         title_layout= (TextInputLayout) findViewById(R.id.title_layout);
@@ -131,6 +132,7 @@ public class AddItem extends Activity {
             }
         });
     }
+
     private void startCameraActivity(){                                         //相機        "/imgs"是不確定的用法
         try{
             String imagePath = DATA_PATH + "/imgs";
@@ -149,6 +151,7 @@ public class AddItem extends Activity {
             Log.e(TAG,e.getMessage());
         }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == 100 && resultCode == Activity.RESULT_OK){                 //從這邊開始
@@ -166,8 +169,6 @@ public class AddItem extends Activity {
             }
         }
     }
-
-
 
     private void prepareTessData(){                                             //一樣不確定路徑有沒有抓到
         try{
@@ -207,7 +208,6 @@ public class AddItem extends Activity {
         }
     }
 
-
     private String getText(Bitmap bitmap) {                                         //最後的部分
         try{
             tessbaseAPI = new TessBaseAPI();
@@ -226,30 +226,30 @@ public class AddItem extends Activity {
         return retStr;
     }
 
-    public void showDatePickerDialog() {
+    public static  void showDatePickerDialog(final Button button, final Context context) {
         // 設定初始日期
         Calendar c = Calendar.getInstance();
-        String nowDate = date_view.getText().toString();
+        String nowDate = button.getText().toString();
         try {
             c.setTime(sdf.parse(nowDate));
             // 跳出日期選擇器
-            DatePickerDialog dpd = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            DatePickerDialog dpd = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
                 public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                     // 完成選擇，顯示日期
                     if (monthOfYear <= 8 && dayOfMonth <= 9) {
-                        date_view.setText(year + "/0" + (monthOfYear + 1) + "/0" + dayOfMonth);
+                        button.setText(year + "/0" + (monthOfYear + 1) + "/0" + dayOfMonth);
                     } else if (monthOfYear <= 8 && dayOfMonth > 9) {
-                        date_view.setText(year + "/0" + (monthOfYear + 1) + "/" + dayOfMonth);
+                        button.setText(year + "/0" + (monthOfYear + 1) + "/" + dayOfMonth);
                     } else if (monthOfYear > 8 && dayOfMonth <= 9) {
-                        date_view.setText(year + "/" + (monthOfYear + 1) + "/0" + dayOfMonth);
+                        button.setText(year + "/" + (monthOfYear + 1) + "/0" + dayOfMonth);
                     } else {
-                        date_view.setText(year + "/" + (monthOfYear + 1) + "/" + dayOfMonth);
+                        button.setText(year + "/" + (monthOfYear + 1) + "/" + dayOfMonth);
                     }
                 }
             }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
             dpd.show();
         } catch (Exception e) {
-            date_view.setText(getToday());
+            button.setText(getToday());
         }
     }
     public static String getToday() {
@@ -258,28 +258,29 @@ public class AddItem extends Activity {
     public static String getNewTime() {
         return sdf2.format(Calendar.getInstance().getTime());
     }
-    public void showTimePickerDialog() {
+    public static void showTimePickerDialog(final Button button, final Context context) {
         Calendar c = Calendar.getInstance();
-        String nowTime = btn_clock_view.getText().toString();
+        String nowTime = button.getText().toString();
         try {
             c.setTime(sdf2.parse(nowTime));
             // 跳出日期選擇器
-            new TimePickerDialog(this,android.R.style.Theme_Holo_Light_Dialog ,new TimePickerDialog.OnTimeSetListener(){
+            new TimePickerDialog(context,android.R.style.Theme_Holo_Light_Dialog ,new TimePickerDialog.OnTimeSetListener(){
                 @Override
                 public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                     String timeStr = "";
                     if (minute < 10){
                         timeStr = hourOfDay + ":0" + minute;
-                        btn_clock_view.setText(timeStr);}
+                        button.setText(timeStr);}
                     else{
                         timeStr = hourOfDay + ":" + minute;
-                        btn_clock_view.setText(timeStr);}
+                        button.setText(timeStr);}
                 }
             }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show();
         } catch (Exception e) {
-            btn_clock_view.setText(getNewTime());
+            button.setText(getNewTime());
         }
     }
+
     private TextWatcher mTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -299,16 +300,16 @@ public class AddItem extends Activity {
                 title_layout.setError(null);//hide
         }
     };
+
     @Override
     protected void onPause() {
         super.onPause();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
     }
-
-
 
     private void check_if_null(){
         final SQLiteDatabase write_db = helper.getWritableDatabase();
