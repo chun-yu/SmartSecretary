@@ -309,6 +309,7 @@ public class AddItem extends Activity {
     }
 
 
+
     private void check_if_null(){
         final SQLiteDatabase write_db = helper.getWritableDatabase();
         String s1 = title_text.getText().toString();

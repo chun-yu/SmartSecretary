@@ -1,6 +1,8 @@
 package com.example.windsound.smartsecretary;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,6 +23,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.DatePicker;
+import android.widget.TimePicker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,12 +34,13 @@ import java.util.Calendar;
 public class memo extends Activity {
 
     private DBHelper helper = null;
-    private Button back_btn2,addmemo_fbtn;
+    private Button back_btn2,addmemo_fbtn,article_date,article_time;
     private ImageButton search_btn;
     private LinearLayout memo_show;
     private Cursor res;
     PopupWindow popupWindow;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+    private static SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm");
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,6 +53,7 @@ public class memo extends Activity {
                 finish();
             }
         });
+
         memo_show = (LinearLayout) findViewById(R.id.memo_show);
         show_memo_to_click();
     }
@@ -89,6 +95,8 @@ public class memo extends Activity {
         }
         putin_array_add_show(datearrary,big,small);
     }
+
+
     private void putin_array_add_show(int[] datearrary,int big,int small){
         boolean putid = false;
         ArrayList<Integer> big_idarrary = new ArrayList<Integer>();
@@ -282,18 +290,35 @@ public class memo extends Activity {
         }
     }
 
+
+
     private  void PopArticle(View v,final int _article_id,String _time,int _check,String _date,String _title,String _note){
         final String date = _date;
         final String time = _time;
         final String title = _title;
         final String note = _note;
         final int check = _check;
+        article_date = (Button) findViewById(R.id.article_date);
+        article_date.setText(getToday());
+        article_date.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+                showDatePickerDialog(v);
+            }
+        });
+        article_time = (Button) findViewById(R.id.article_time);
+        article_time.setText(getNewTime());
+        article_time.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+                showTimePickerDialog(v);
+            }
+        });
             View popWindow_view = getLayoutInflater().inflate(R.layout.article_display,null);
             final Button article_date = (Button) popWindow_view.findViewById(R.id.article_date);
             final Button article_time = (Button) popWindow_view.findViewById(R.id.article_time);
             final Button article_close = (Button) popWindow_view.findViewById(R.id.article_close);
             final TextInputEditText title_text_article = (TextInputEditText) popWindow_view.findViewById(R.id.title_text_article);
             final TextInputEditText content_text_article = (TextInputEditText) popWindow_view.findViewById(R.id.content_text_article);
+
             FrameLayout.LayoutParams para = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,FrameLayout.LayoutParams.FILL_PARENT);
             popWindow_view.setLayoutParams(para);
             popupWindow = new PopupWindow(popWindow_view,1000,1500, true);
@@ -306,6 +331,15 @@ public class memo extends Activity {
             title_text_article.setText(title);
             content_text_article.setText(note);
 
+
+            article_date.setOnClickListener( new View.OnClickListener(){
+                public void onClick (View v){
+                }
+            });
+            article_time.setOnClickListener( new View.OnClickListener(){
+                public void onClick (View v){
+                }
+            });
             article_close.setOnClickListener( new View.OnClickListener(){
                 public void onClick (View v){
                     String s1 = title_text_article.getText().toString();
@@ -315,15 +349,63 @@ public class memo extends Activity {
                     check_update_correct(_article_id,s1,s2,check,time2,date2);
                 }
             });
-            article_date.setOnClickListener( new View.OnClickListener(){
-                public void onClick (View v){
-                }
-            });
-            article_time.setOnClickListener( new View.OnClickListener(){
-                public void onClick (View v){
-                }
-            });
     }
+
+    public void showDatePickerDialog(View v) {
+        // 設定初始日期
+        Calendar c = Calendar.getInstance();
+        String nowDate = article_date.getText().toString();
+        try {
+            c.setTime(sdf.parse(nowDate));
+            // 跳出日期選擇器
+            DatePickerDialog dpd = new DatePickerDialog(v.getContext(), new DatePickerDialog.OnDateSetListener() {
+                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                    // 完成選擇，顯示日期
+                    if (monthOfYear <= 8 && dayOfMonth <= 9) {
+                        article_date.setText(year + "/0" + (monthOfYear + 1) + "/0" + dayOfMonth);
+                    } else if (monthOfYear <= 8 && dayOfMonth > 9) {
+                        article_date.setText(year + "/0" + (monthOfYear + 1) + "/" + dayOfMonth);
+                    } else if (monthOfYear > 8 && dayOfMonth <= 9) {
+                        article_date.setText(year + "/" + (monthOfYear + 1) + "/0" + dayOfMonth);
+                    } else {
+                        article_date.setText(year + "/" + (monthOfYear + 1) + "/" + dayOfMonth);
+                    }
+                }
+            }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+            dpd.show();
+        } catch (Exception e) {
+            article_date.setText(getToday());
+        }
+    }
+    public static String getToday() {
+        return sdf.format(Calendar.getInstance().getTime());
+    }
+    public static String getNewTime() {
+        return sdf2.format(Calendar.getInstance().getTime());
+    }
+    public void showTimePickerDialog(View v) {
+        Calendar c = Calendar.getInstance();
+        String nowTime = article_time.getText().toString();
+        try {
+            c.setTime(sdf2.parse(nowTime));
+            // 跳出日期選擇器
+            new TimePickerDialog(v.getContext(),android.R.style.Theme_Holo_Light_Dialog ,new TimePickerDialog.OnTimeSetListener(){
+                @Override
+                public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                    String timeStr = "";
+                    if (minute < 10){
+                        timeStr = hourOfDay + ":0" + minute;
+                        article_time.setText(timeStr);}
+                    else{
+                        timeStr = hourOfDay + ":" + minute;
+                        article_time.setText(timeStr);}
+                }
+            }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show();
+        } catch (Exception e) {
+            article_time.setText(getNewTime());
+        }
+    }
+
     private void check_update_correct(int id,String s1,String s2,int check,String time,String date){
         final SQLiteDatabase write_db = helper.getWritableDatabase();
         if(s1.equals("") && !s2.equals("")){
