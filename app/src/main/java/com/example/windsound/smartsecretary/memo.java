@@ -1,6 +1,8 @@
 package com.example.windsound.smartsecretary;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,6 +23,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.DatePicker;
+import android.widget.TimePicker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -89,6 +93,7 @@ public class memo extends Activity {
         }
         putin_array_add_show(datearrary,big,small);
     }
+
     private void putin_array_add_show(int[] datearrary,int big,int small){
         boolean putid = false;
         ArrayList<Integer> big_idarrary = new ArrayList<Integer>();
@@ -165,6 +170,7 @@ public class memo extends Activity {
             }
         }
     }
+
     private void add_table_show(int _article_id, int color,String _date, String _title, String _time,int _check,String _note) {
         final int article_id = _article_id;
         final String date = _date;
@@ -251,6 +257,7 @@ public class memo extends Activity {
         memo_show.addView(tr);
         memo_show.addView(space);
     }
+
     private String getDay_of_week(String date){
         Calendar c = Calendar.getInstance();
         int t;
@@ -289,23 +296,41 @@ public class memo extends Activity {
         final String note = _note;
         final int check = _check;
             View popWindow_view = getLayoutInflater().inflate(R.layout.article_display,null);
+            LinearLayout text_linear_article = (LinearLayout) popWindow_view.findViewById(R.id.text_linear_article);
             final Button article_date = (Button) popWindow_view.findViewById(R.id.article_date);
             final Button article_time = (Button) popWindow_view.findViewById(R.id.article_time);
             final Button article_close = (Button) popWindow_view.findViewById(R.id.article_close);
             final TextInputEditText title_text_article = (TextInputEditText) popWindow_view.findViewById(R.id.title_text_article);
             final TextInputEditText content_text_article = (TextInputEditText) popWindow_view.findViewById(R.id.content_text_article);
+
             FrameLayout.LayoutParams para = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,FrameLayout.LayoutParams.FILL_PARENT);
             popWindow_view.setLayoutParams(para);
+            text_linear_article.setPadding(20,30,20,20);
             popupWindow = new PopupWindow(popWindow_view,1000,1500, true);
             popupWindow.setAnimationStyle(R.style.AnimationFade);
             popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
             popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
             popupWindow.showAtLocation(v, Gravity.CENTER,0,0);
+            popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+                    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                }
+            });
             article_date.setText(date);
             article_time.setText(time);
             title_text_article.setText(title);
             content_text_article.setText(note);
-
+            article_date.setOnClickListener( new View.OnClickListener(){
+                public void onClick (View v){
+                    AddItem.showDatePickerDialog(article_date,v.getContext());
+                }
+            });
+            article_time.setOnClickListener( new View.OnClickListener(){
+                public void onClick (View v){
+                    AddItem.showTimePickerDialog(article_time,v.getContext());
+                }
+            });
             article_close.setOnClickListener( new View.OnClickListener(){
                 public void onClick (View v){
                     String s1 = title_text_article.getText().toString();
@@ -315,15 +340,8 @@ public class memo extends Activity {
                     check_update_correct(_article_id,s1,s2,check,time2,date2);
                 }
             });
-            article_date.setOnClickListener( new View.OnClickListener(){
-                public void onClick (View v){
-                }
-            });
-            article_time.setOnClickListener( new View.OnClickListener(){
-                public void onClick (View v){
-                }
-            });
     }
+
     private void check_update_correct(int id,String s1,String s2,int check,String time,String date){
         final SQLiteDatabase write_db = helper.getWritableDatabase();
         if(s1.equals("") && !s2.equals("")){
