@@ -131,6 +131,7 @@ public class AddItem extends Activity {
             }
         });
     }
+
     private void startCameraActivity(){                                         //相機        "/imgs"是不確定的用法
         try{
             String imagePath = DATA_PATH + "/imgs";
@@ -149,204 +150,205 @@ public class AddItem extends Activity {
             Log.e(TAG,e.getMessage());
         }
     }
-<<<<<<< HEAD
 
-
-    private void startOCR(Uri outputfileDir){
-        try{
+    /*
+    private void startOCR(Uri outputfileDir) {
+        try {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize = 7;
-            Bitmap bitmap = BitmapFactory.decodeFile(outputfileDir.getPath(),options);
+            Bitmap bitmap = BitmapFactory.decodeFile(outputfileDir.getPath(), options);
             String result = this.getText(bitmap);
             content_text.setText(result);
-        }catch (Exception e){
-            Log.e(TAG,e.getMessage());
-=======
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == 100 && resultCode == Activity.RESULT_OK){                 //從這邊開始
-            prepareTessData();
-            startOCR(outputfileDir);
-        }else Toast.makeText(getApplicationContext(), "Image problem", Toast.LENGTH_SHORT).show();   //到這邊
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case RESULT_SPEECH: {
-                if (resultCode == RESULT_OK && null != data) {
-                    ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    content_text.setText(text.get(0));
-                }
-                break;
-            }
->>>>>>> master
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
         }
-    }
-
-
-
-    private void prepareTessData(){                                             //一樣不確定路徑有沒有抓到
-        try{
-            File dir = new File(DATA_PATH + TESS_DATA);
-            if(!dir.exists()){
-                dir.mkdir();
-            }
-            String fileList[] = getAssets().list("");
-            for(String fileName : fileList){
-                String pathToDataFile = DATA_PATH + TESS_DATA + "/" + fileName;
-                if(!(new File(pathToDataFile)).exists()){
-                    InputStream in = getAssets().open(fileName);
-                    OutputStream out = new FileOutputStream(pathToDataFile);
-                    byte[] buff = new byte[1024];
-                    int len;
-                    while ((len = in.read(buff))>0){
-                        out.write(buff,0,len);
+     */
+        @Override
+        protected void onActivityResult ( int requestCode, int resultCode, Intent data){
+            if (requestCode == 100 && resultCode == Activity.RESULT_OK) {                 //從這邊開始
+                prepareTessData();
+                startOCR(outputfileDir);
+            } else
+                Toast.makeText(getApplicationContext(), "Image problem", Toast.LENGTH_SHORT).show();   //到這邊
+            super.onActivityResult(requestCode, resultCode, data);
+            switch (requestCode) {
+                case RESULT_SPEECH: {
+                    if (resultCode == RESULT_OK && null != data) {
+                        ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                        content_text.setText(text.get(0));
                     }
-                    in.close();
-                    out.close();
+                    break;
                 }
             }
-        }catch (Exception e){
-            Log.e(TAG,e.getMessage());
         }
-    }
-
-    private void startOCR(Uri imageUri){                                                //OCR
-        try{
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 7;
-            Bitmap bitmap = BitmapFactory.decodeFile(imageUri.getPath(),options);
-            String result = this.getText(bitmap);
-            content_text.setText(result);                                               //這行不確定有沒有打對
-        }catch (Exception e){
-            Log.e(TAG,e.getMessage());
-        }
-    }
-
-
-    private String getText(Bitmap bitmap) {                                         //最後的部分
-        try{
-            tessbaseAPI = new TessBaseAPI();
-        }catch (Exception e){
-            Log.e(TAG,e.getMessage());
-        }
-        tessbaseAPI.init(DATA_PATH,"chi_tra");                                  //這行應該是抓中文辨識吧?
-        tessbaseAPI.setImage(bitmap);
-        String retStr = "No result";
-        try{
-            retStr = tessbaseAPI.getUTF8Text();
-        }catch(Exception e){
-            Log.e(TAG,e.getMessage());
-        }
-        tessbaseAPI.end();
-        return retStr;
-    }
-
-    public void showDatePickerDialog() {
-        // 設定初始日期
-        Calendar c = Calendar.getInstance();
-        String nowDate = date_view.getText().toString();
-        try {
-            c.setTime(sdf.parse(nowDate));
-            // 跳出日期選擇器
-            DatePickerDialog dpd = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                    // 完成選擇，顯示日期
-                    if (monthOfYear <= 8 && dayOfMonth <= 9) {
-                        date_view.setText(year + "/0" + (monthOfYear + 1) + "/0" + dayOfMonth);
-                    } else if (monthOfYear <= 8 && dayOfMonth > 9) {
-                        date_view.setText(year + "/0" + (monthOfYear + 1) + "/" + dayOfMonth);
-                    } else if (monthOfYear > 8 && dayOfMonth <= 9) {
-                        date_view.setText(year + "/" + (monthOfYear + 1) + "/0" + dayOfMonth);
-                    } else {
-                        date_view.setText(year + "/" + (monthOfYear + 1) + "/" + dayOfMonth);
+        private void prepareTessData ()
+        {                                             //一樣不確定路徑有沒有抓到
+            try {
+                File dir = new File(DATA_PATH + TESS_DATA);
+                if (!dir.exists()) {
+                    dir.mkdir();
+                }
+                String fileList[] = getAssets().list("");
+                for (String fileName : fileList) {
+                    String pathToDataFile = DATA_PATH + TESS_DATA + "/" + fileName;
+                    if (!(new File(pathToDataFile)).exists()) {
+                        InputStream in = getAssets().open(fileName);
+                        OutputStream out = new FileOutputStream(pathToDataFile);
+                        byte[] buff = new byte[1024];
+                        int len;
+                        while ((len = in.read(buff)) > 0) {
+                            out.write(buff, 0, len);
+                        }
+                        in.close();
+                        out.close();
                     }
                 }
-            }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
-            dpd.show();
-        } catch (Exception e) {
-            date_view.setText(getToday());
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
         }
-    }
-    public static String getToday() {
-        return sdf.format(Calendar.getInstance().getTime());
-    }
-    public static String getNewTime() {
-        return sdf2.format(Calendar.getInstance().getTime());
-    }
-    public void showTimePickerDialog() {
-        Calendar c = Calendar.getInstance();
-        String nowTime = btn_clock_view.getText().toString();
-        try {
-            c.setTime(sdf2.parse(nowTime));
-            // 跳出日期選擇器
-            new TimePickerDialog(this,android.R.style.Theme_Holo_Light_Dialog ,new TimePickerDialog.OnTimeSetListener(){
-                @Override
-                public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                    String timeStr = "";
-                    if (minute < 10){
-                        timeStr = hourOfDay + ":0" + minute;
-                        btn_clock_view.setText(timeStr);}
-                    else{
-                        timeStr = hourOfDay + ":" + minute;
-                        btn_clock_view.setText(timeStr);}
+
+
+        private void startOCR (Uri imageUri)
+        {                                                //OCR
+            try {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = 7;
+                Bitmap bitmap = BitmapFactory.decodeFile(imageUri.getPath(), options);
+                String result = this.getText(bitmap);
+                content_text.setText(result);                                               //這行不確定有沒有打對
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+
+
+        private String getText (Bitmap bitmap){                                         //最後的部分
+            try {
+                tessbaseAPI = new TessBaseAPI();
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
+            tessbaseAPI.init(DATA_PATH, "chi_tra");                                  //這行應該是抓中文辨識吧?
+            tessbaseAPI.setImage(bitmap);
+            String retStr = "No result";
+            try {
+                retStr = tessbaseAPI.getUTF8Text();
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
+            tessbaseAPI.end();
+            return retStr;
+        }
+
+        public void showDatePickerDialog () {
+            // 設定初始日期
+            Calendar c = Calendar.getInstance();
+            String nowDate = date_view.getText().toString();
+            try {
+                c.setTime(sdf.parse(nowDate));
+                // 跳出日期選擇器
+                DatePickerDialog dpd = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        // 完成選擇，顯示日期
+                        if (monthOfYear <= 8 && dayOfMonth <= 9) {
+                            date_view.setText(year + "/0" + (monthOfYear + 1) + "/0" + dayOfMonth);
+                        } else if (monthOfYear <= 8 && dayOfMonth > 9) {
+                            date_view.setText(year + "/0" + (monthOfYear + 1) + "/" + dayOfMonth);
+                        } else if (monthOfYear > 8 && dayOfMonth <= 9) {
+                            date_view.setText(year + "/" + (monthOfYear + 1) + "/0" + dayOfMonth);
+                        } else {
+                            date_view.setText(year + "/" + (monthOfYear + 1) + "/" + dayOfMonth);
+                        }
+                    }
+                }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+                dpd.show();
+            } catch (Exception e) {
+                date_view.setText(getToday());
+            }
+        }
+        public static String getToday () {
+            return sdf.format(Calendar.getInstance().getTime());
+        }
+        public static String getNewTime () {
+            return sdf2.format(Calendar.getInstance().getTime());
+        }
+        public void showTimePickerDialog () {
+            Calendar c = Calendar.getInstance();
+            String nowTime = btn_clock_view.getText().toString();
+            try {
+                c.setTime(sdf2.parse(nowTime));
+                // 跳出日期選擇器
+                new TimePickerDialog(this, android.R.style.Theme_Holo_Light_Dialog, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        String timeStr = "";
+                        if (minute < 10) {
+                            timeStr = hourOfDay + ":0" + minute;
+                            btn_clock_view.setText(timeStr);
+                        } else {
+                            timeStr = hourOfDay + ":" + minute;
+                            btn_clock_view.setText(timeStr);
+                        }
+                    }
+                }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show();
+            } catch (Exception e) {
+                btn_clock_view.setText(getNewTime());
+            }
+        }
+        private TextWatcher mTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (title_layout.getEditText().getText().length() > title_layout.getCounterMaxLength())
+                    title_layout.setError("輸入內容超過上限");//show
+                else
+                    title_layout.setError(null);//hide
+            }
+        };
+        @Override
+        protected void onPause () {
+            super.onPause();
+        }
+        @Override
+        protected void onResume () {
+            super.onResume();
+        }
+
+
+        private void check_if_null () {
+            final SQLiteDatabase write_db = helper.getWritableDatabase();
+            String s1 = title_text.getText().toString();
+            String s2 = content_text.getText().toString();
+            if (s1.equals("") && !s2.equals("")) {
+                Toast.makeText(AddItem.this, getString(R.string.please_title), Toast.LENGTH_LONG).show();
+            } else if (!s1.equals("") && s2.equals("")) {
+                Toast.makeText(AddItem.this, getString(R.string.content), Toast.LENGTH_LONG).show();
+            } else if (s1.equals("") && s2.equals("")) {
+                Toast.makeText(AddItem.this, getString(R.string.please_title) + "\n" + getString(R.string.content), Toast.LENGTH_LONG).show();
+            } else {
+                if (alarm_switch.isChecked()) {
+                    Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
+                    finish();
+                } else {
+                    Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
+                    finish();
                 }
-            }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show();
-        } catch (Exception e) {
-            btn_clock_view.setText(getNewTime());
-        }
-    }
-    private TextWatcher mTextWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            if (title_layout.getEditText().getText().length() > title_layout.getCounterMaxLength())
-                title_layout.setError("輸入內容超過上限");//show
-            else
-                title_layout.setError(null);//hide
-        }
-    };
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-
-    private void check_if_null(){
-        final SQLiteDatabase write_db = helper.getWritableDatabase();
-        String s1 = title_text.getText().toString();
-        String s2 = content_text.getText().toString();
-        if(s1.equals("") && !s2.equals("")){
-            Toast.makeText(AddItem.this,getString(R.string.please_title), Toast.LENGTH_LONG).show();
-        }else if(!s1.equals("") && s2.equals("")){
-            Toast.makeText(AddItem.this,getString(R.string.content), Toast.LENGTH_LONG).show();
-        }else if(s1.equals("") && s2.equals("")){
-            Toast.makeText(AddItem.this,getString(R.string.please_title)+"\n"+getString(R.string.content), Toast.LENGTH_LONG).show();
-        }else{
-            if(alarm_switch.isChecked()){
-                Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +"\n"+getString(R.string.open_Alaem), Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER,0,0);
-                toast.show();
-                helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1,date_view.getText().toString(),title_text.getText().toString(), content_text.getText().toString());
-                finish();
-            }else{
-                Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +"\n"+getString(R.string.close_Alaem), Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER,0,0);
-                toast.show();
-                helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0,date_view.getText().toString(),title_text.getText().toString(), content_text.getText().toString());
-                finish();
             }
         }
     }
-}

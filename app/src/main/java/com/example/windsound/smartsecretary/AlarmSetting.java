@@ -25,44 +25,58 @@ public class AlarmSetting extends Activity {
     Button btnBack, btnDetermine;
     private DBHelper helper = null;
     String time = "", date = "";
+    int year = 0, month = 0, day = 0, hour = 0, min = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.alarm_setting);
 
-        helper = new DBHelper(this);
-        final SQLiteDatabase write_db = helper.getWritableDatabase();
-
         initView();
         Bundle bundle = this.getIntent().getExtras();
         final int index = bundle.getInt("index");
 
+        helper = new DBHelper(this);
+        final SQLiteDatabase write_db = helper.getWritableDatabase();
+
         date = Alarm.alarmDateList.get(index);
+        time = Alarm.alarmTimeList.get(index);
+
+        year = Integer.parseInt(date.split("/")[0]);
+        month = Integer.parseInt(date.split("/")[1]);
+        month--;
+        day = Integer.parseInt(date.split("/")[2]);
+        hour = Integer.parseInt(time.split(":")[0]);
+        min = Integer.parseInt(time.split(":")[1]);
+
         tvAlarmDate.setText(date);
         tvAlarmDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Calendar c = Calendar.getInstance();
-                int year = Integer.parseInt(date.split("/")[0]);
-                int month = Integer.parseInt(date.split("/")[1]);
-                int day = Integer.parseInt(date.split("/")[2]);
                 new DatePickerDialog(AlarmSetting.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
-                    public void onDateSet(DatePicker view, int year, int month, int day) {
-                        date = year + "/" + (month+1) + "/" + day;
+                    public void onDateSet(DatePicker view, int _year, int _month, int _day) {
+                        year = _year;
+                        month = _month;
+                        day = _day;
+                        if (month < 9 && day < 10)
+                            date = year + "/0" + (month+1) + "/0" + day;
+                        else if (month < 9)
+                            date = year + "/0" + (month+1) + "/" + day;
+                        else if (day < 10)
+                            date = year + "/" + (month+1) + "/0" + day;
+                        else
+                            date = year + "/" + (month+1) + "/" + day;
                         tvAlarmDate.setText(date);
                     }
-                }, year, month-1, day).show();
+                }, year, month, day).show();
             }
         });
-        time = Alarm.alarmTimeList.get(index);
+
         _tvAlarmTime.setText(time);
         _tvAlarmTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int hour = Integer.parseInt(time.split(":")[0]);
-                int min = Integer.parseInt(time.split(":")[1]);
                 new TimePickerDialog(AlarmSetting.this, new TimePickerDialog.OnTimeSetListener(){
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -72,6 +86,8 @@ public class AlarmSetting extends Activity {
                             time = hourOfDay + ":" + minute;
                         if (hourOfDay < 10)
                             time = "0" + time;
+                        hour = hourOfDay;
+                        min = minute;
                         _tvAlarmTime.setText(time);
                     }
                 }, hour, min, false).show();
@@ -87,13 +103,21 @@ public class AlarmSetting extends Activity {
         btnDetermine.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
-                helper.updateTimeInfo(write_db, Alarm.alarmIDList.get(index), time, 1, date, null, null);
-                Toast.makeText(AlarmSetting.this, "時間已修改為 " + time, Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(AlarmSetting.this,Alarm.class);
-                Bundle bundle = new Bundle();
-                bundle.putInt("index", index);
-                intent.putExtras(bundle);
-                startActivity(intent);
+                if (!Alarm.isTimeExist(date, time)) {
+                    helper.updateTimeInfo(write_db, Alarm.alarmIDList.get(index), time, 1, date, null, null);
+                    Toast.makeText(AlarmSetting.this, "時間已修改為 " + time, Toast.LENGTH_SHORT).show();
+                    Alarm.cancelAlarm(AlarmSetting.this, Alarm.alarmIDList.get(index));
+                    Alarm.setAlarm(AlarmSetting.this, year, month+1, day, hour, min, Alarm.alarmIDList.get(index));
+                    Intent intent = new Intent(AlarmSetting.this, Alarm.class);
+                    startActivity(intent);
+                }
+                else {
+                    Toast.makeText(AlarmSetting.this, "該時間已設定過", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                //Bundle bundle = new Bundle();
+                //bundle.putInt("index", index);
+                //intent.putExtras(bundle);
             }
         });
     }

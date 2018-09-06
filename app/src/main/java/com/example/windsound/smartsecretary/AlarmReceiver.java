@@ -20,11 +20,11 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         if (bundle.getString("msg").equals("time's_up")) {
             //sp = new SoundPool(10, AudioManager.STREAM_MUSIC, 5);
-            //sourceid = sp.load(context, R.raw.harm, 1);
+            //sourceid = sp.load(context, R.raw.wake_up, 1);
             //playSounds(1, context);
             //Toast.makeText(context, "time's up", Toast.LENGTH_SHORT).show();
             Intent i = new Intent(context, AlarmWake.class);
-            i.putExtra("index", index);
+            //i.putExtra("index", index);
             context.startActivity(i);
         }
     }

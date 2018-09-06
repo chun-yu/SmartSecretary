@@ -32,13 +32,13 @@ import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
 public class Alarm extends Activity {
 
-    private DBHelper helper = null;
+    static DBHelper helper = null;
     private FloatingActionButton fabNewAlarm;
     //private AlarmManager alarmManager;
     //private PendingIntent alarmIntent;
     LinearLayout LLV, LLV_display;
     TextView tvAlarmTime;
-    Cursor cursor;
+    static Cursor cursor;
     Switch swAlarm;
     public static ArrayList<String> alarmTimeList = new ArrayList<String>();
     public static ArrayList<String> alarmDateList = new ArrayList<String>();
@@ -68,13 +68,9 @@ public class Alarm extends Activity {
         Bundle b = this.getIntent().getExtras();
         if (b != null) {
             int index = b.getInt("index");
-            cancelAlarm(alarmIDList.get(index));
-            int hour = Integer.parseInt(alarmTimeList.get(index).split(":")[0]);
-            int min = Integer.parseInt(alarmTimeList.get(index).split(":")[1]);
-            int year = Integer.parseInt(alarmDateList.get(index).split("/")[0]);
-            int month = Integer.parseInt(alarmDateList.get(index).split("/")[1]);
-            int date = Integer.parseInt(alarmDateList.get(index).split("/")[2]);
-            setAlarm(year, month, date, hour, min, alarmIDList.get(index));
+            helper.updateTimeInfo(write_db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), null, null);
+            checkList.set(index, 0);
+            switchList.get(index).setChecked(false);
         }
 
         fabNewAlarm.setOnClickListener(new Button.OnClickListener(){
@@ -93,26 +89,37 @@ public class Alarm extends Activity {
                             timeStr = "0" + timeStr;
 
                         setDate(hourOfDay, minute);
-                        String dateStr = YMD[0] + "/" + YMD[1] + "/" + YMD[2];
-                        helper.insertInfo(write_db, timeStr, 1, dateStr, null, null);
-                        updateIDList();
-                        Log.d("ID List size", alarmIDList.size() + "");
-                        alarmTimeList.add(timeStr);
-                        alarmDateList.add(dateStr);
-                        checkList.add(1);
-                        final int id = alarmIDList.get(alarmIDList.size()-1);
-                        setAlarm(YMD[0], YMD[1], YMD[2], hourOfDay, minute, alarmIDList.get(alarmIDList.size()-1));
-                        view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
-                        viewList.add(view_alarm_display);
-                        tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
-                        tvList.add(tvAlarmTime);
-                        swAlarm = (Switch) view_alarm_display.findViewById(R.id.swAlarm);
-                        switchList.add(swAlarm);
-                        LLV_display = (LinearLayout) view_alarm_display.findViewById(R.id.LLV_display);
-                        tvAlarmTime.setText(timeStr);
-                        swAlarm.setChecked(true);
-                        setListener(write_db, swAlarm, tvAlarmTime, alarmIDList.size()-1);
-                        LLV.addView(view_alarm_display);
+                        String dateStr = "";
+                        if (YMD[1] < 10 && YMD[2] < 10)
+                            dateStr = YMD[0] + "/0" + YMD[1] + "/0" + YMD[2];
+                        else if (YMD[1] < 10)
+                            dateStr = YMD[0] + "/0" + YMD[1] + "/" + YMD[2];
+                        else if (YMD[2] < 10)
+                            dateStr = YMD[0] + "/" + YMD[1] + "/0" + YMD[2];
+                        else
+                            dateStr = YMD[0] + "/" + YMD[1] + "/" + YMD[2];
+                        if (!isTimeExist(dateStr, timeStr)) {
+                            helper.insertInfo(write_db, timeStr, 1, dateStr, null, null);
+                            updateIDList();
+                            alarmTimeList.add(timeStr);
+                            alarmDateList.add(dateStr);
+                            checkList.add(1);
+                            setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hourOfDay, minute, alarmIDList.get(alarmIDList.size() - 1));
+                            view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
+                            viewList.add(view_alarm_display);
+                            tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
+                            tvList.add(tvAlarmTime);
+                            swAlarm = (Switch) view_alarm_display.findViewById(R.id.swAlarm);
+                            switchList.add(swAlarm);
+                            LLV_display = (LinearLayout) view_alarm_display.findViewById(R.id.LLV_display);
+                            tvAlarmTime.setText(timeStr);
+                            swAlarm.setChecked(true);
+                            setListener(write_db, swAlarm, tvAlarmTime, alarmIDList.size()-1);
+                            LLV.addView(view_alarm_display);
+                        }
+                        else {
+                            Toast.makeText(Alarm.this, "該時間已設定過", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }, nowHour, nowMin, false).show();
             }
@@ -136,14 +143,22 @@ public class Alarm extends Activity {
                     int min = Integer.parseInt(alarmTimeList.get(index).split(":")[1]);
 
                     setDate(hour, min);
-                    String dateStr = YMD[0] + "/" + YMD[1] + "/" + YMD[2];
+                    String dateStr = "";
+                    if (YMD[1] < 10 && YMD[2] < 10)
+                        dateStr = YMD[0] + "/0" + YMD[1] + "/0" + YMD[2];
+                    else if (YMD[1] < 10)
+                        dateStr = YMD[0] + "/0" + YMD[1] + "/" + YMD[2];
+                    else if (YMD[2] < 10)
+                        dateStr = YMD[0] + "/" + YMD[1] + "/0" + YMD[2];
+                    else
+                        dateStr = YMD[0] + "/" + YMD[1] + "/" + YMD[2];
                     alarmDateList.set(index, dateStr);
                     helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, dateStr, null, null);
-                    setAlarm(YMD[0], YMD[1], YMD[2], hour, min, alarmIDList.get(index));
+                    setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hour, min, alarmIDList.get(index));
                 }
                 else {
                     helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), null, null);
-                    cancelAlarm(alarmIDList.get(index));
+                    cancelAlarm(Alarm.this, alarmIDList.get(index));
                     Log.d("Switch", "close");
                 }
             }
@@ -222,6 +237,21 @@ public class Alarm extends Activity {
         }
     }
 
+    public static boolean isTimeExist(String newDate, String newTime) {
+        cursor = helper.getInfo(helper.getReadableDatabase());
+        if (cursor != null) {
+            cursor.moveToFirst();
+            for (int i = 0; i < cursor.getCount(); i++) {
+                String time = cursor.getString(1);
+                String date = cursor.getString(3);
+                if (newDate.equals(date) && newTime.equals(time))
+                    return true;
+                cursor.moveToNext();
+            }
+        }
+        return false;
+    }
+
     void updateIDList() {
         cursor = helper.getInfo(helper.getReadableDatabase());
         alarmIDList.clear();
@@ -279,7 +309,7 @@ public class Alarm extends Activity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     helper.remove_Time(db, id);
-                    cancelAlarm(id);
+                    cancelAlarm(Alarm.this, id);
                     int idx = alarmIDList.indexOf(id);
                     Log.d("ID", id + "");
                     Log.d("ID index", idx + "");
@@ -310,15 +340,15 @@ public class Alarm extends Activity {
             .show();
     }
 
-    public void setAlarm(int year, int month, int date, int hour, int min, int RC) {
-        Intent intent = new Intent(Alarm.this, AlarmReceiver.class);
+    public static void setAlarm(Context context, int year, int month, int date, int hour, int min, int RC) {
+        Intent intent = new Intent(context, AlarmReceiver.class);
         Bundle bundle = new Bundle();
         bundle.putString("msg", "time's_up");
         int index = alarmIDList.indexOf(RC);
         bundle.putInt("index", index);
         intent.putExtras(bundle);
-        AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(Alarm.this, RC, intent, FLAG_UPDATE_CURRENT);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, RC, intent, FLAG_UPDATE_CURRENT);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
 
@@ -327,7 +357,7 @@ public class Alarm extends Activity {
         Log.d("DATE", date + "");
         Log.d("HOUR", hour + "");
         Log.d("MIN", min + "");
-        calendar.set(year, month-1, date, hour, min);
+        calendar.set(year, month-1, date, hour, min, 0);
         //calendar.set(Calendar.HOUR_OF_DAY, hour);
         //calendar.set(Calendar.MINUTE, min);
         //alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis()
@@ -339,13 +369,13 @@ public class Alarm extends Activity {
             timeStr = hour + ":0" + min;
         if (hour < 10)
             timeStr = "0" + timeStr;
-        Toast.makeText(this, "鬧鐘已設定 時間為" + timeStr, Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "鬧鐘已設定 時間為" + timeStr, Toast.LENGTH_SHORT).show();
     }
 
-    public void cancelAlarm(int RC) {
-        Intent intent = new Intent(Alarm.this, AlarmReceiver.class);
-        AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(Alarm.this, RC, intent, FLAG_UPDATE_CURRENT);
+    public static void cancelAlarm(Context context, int RC) {
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, RC, intent, FLAG_UPDATE_CURRENT);
         alarmManager.cancel(alarmIntent);
         alarmIntent = null;
         //Toast.makeText(this, "取消鬧鐘", Toast.LENGTH_SHORT).show();
