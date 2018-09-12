@@ -148,6 +148,7 @@ public class AddItem extends Activity {
         });
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
     private void startCameraActivity(){                                         //相機        "/imgs"是不確定的用法
@@ -204,6 +205,8 @@ public class AddItem extends Activity {
             }
         }
 >>>>>>> Stashed changes
+=======
+>>>>>>> master
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -213,7 +216,6 @@ public class AddItem extends Activity {
                     ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     content_text.setText(text.get(0));
                 }
-<<<<<<< HEAD
                 break;
             }case DO_TESS: {
                 if (resultCode == Activity.RESULT_OK) {
@@ -230,9 +232,13 @@ public class AddItem extends Activity {
                     prepareTessData();
                     Uri uri = data.getData();
                     String[] proj = { MediaStore.Images.Media.DATA };
+
                     Cursor actualimagecursor = managedQuery(uri,proj,null,null,null);
+
                     int actual_image_column_index = actualimagecursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+
                     actualimagecursor.moveToFirst();
+
                     mCurrentPhotoPath = actualimagecursor.getString(actual_image_column_index);
                     startOCR(outputFileDir);
                 } else if (resultCode == Activity.RESULT_CANCELED) {
@@ -241,10 +247,9 @@ public class AddItem extends Activity {
                     Toast.makeText(getApplicationContext(), "Activity result failed.", Toast.LENGTH_SHORT).show();
                 }
                 break;
-=======
->>>>>>> master
             }
         }
+<<<<<<< HEAD
         private void prepareTessData ()
         {                                             //一樣不確定路徑有沒有抓到
             try {
@@ -265,6 +270,8 @@ public class AddItem extends Activity {
                         }
                         in.close();
                         out.close();
+=======
+>>>>>>> master
     }
 
     private void checkPermission() {
@@ -285,6 +292,7 @@ public class AddItem extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent();
                         intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+
                         startActivityForResult(intent, PHOTO);
                     }
                 });
@@ -346,23 +354,24 @@ public class AddItem extends Activity {
                     while(( len = in.read(buff)) > 0){
                         out.write(buff,0,len);
                     }
+                    in.close();
+                    out.close();
                 }
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
             }
+        }catch (Exception e){
+            Log.e(TAG,e.getMessage());
         }
-<<<<<<< HEAD
     }
     private void startOCR(Uri imageUri){//OCR
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         options.inSampleSize = 6;
-            Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath,options);
-            String result = this.getText(bitmap);
-            content_text.setText(result);                                               //這行不確定有沒有打對
+        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath,options);
+        String result = this.getText(bitmap);
+        content_text.setText(result);                                               //這行不確定有沒有打對
     }
-=======
 
+<<<<<<< HEAD
 
         private void startOCR (Uri imageUri)
         {                                                //OCR
@@ -395,19 +404,21 @@ public class AddItem extends Activity {
             }
             tessbaseAPI.end();
             return retStr;
+=======
+>>>>>>> master
     private String getText(Bitmap bitmap) {                                         //最後的部分
         final TessBaseAPI tessBaseAPI = new TessBaseAPI();
         String dataPath = getExternalFilesDir("/").getPath() + "/";
         tessBaseAPI.init(dataPath,"chi_tra");                                  //這行應該是抓中文辨識吧?
         tessBaseAPI.setImage(bitmap);
         String retStr = "No result";
-<<<<<<< HEAD
         retStr = tessBaseAPI.getUTF8Text();
         tessBaseAPI.end();
         return retStr;
     }
 
 
+<<<<<<< HEAD
 =======
         try{
             retStr = tessbaseAPI.getUTF8Text();
@@ -451,6 +462,8 @@ public class AddItem extends Activity {
 >>>>>>> master
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> master
     public static  void showDatePickerDialog(final Button button, final Context context) {
         // 設定初始日期
         Calendar c = Calendar.getInstance();
@@ -511,56 +524,20 @@ public class AddItem extends Activity {
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
         }
-        public void showTimePickerDialog () {
-            Calendar c = Calendar.getInstance();
-            String nowTime = btn_clock_view.getText().toString();
-            try {
-                c.setTime(sdf2.parse(nowTime));
-                // 跳出日期選擇器
-                new TimePickerDialog(this, android.R.style.Theme_Holo_Light_Dialog, new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        String timeStr = "";
-                        if (minute < 10) {
-                            timeStr = hourOfDay + ":0" + minute;
-                            btn_clock_view.setText(timeStr);
-                        } else {
-                            timeStr = hourOfDay + ":" + minute;
-                            btn_clock_view.setText(timeStr);
-                        }
-                    }
-                }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show();
-            } catch (Exception e) {
-                btn_clock_view.setText(getNewTime());
-            }
-        }
-        private TextWatcher mTextWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (title_layout.getEditText().getText().length() > title_layout.getCounterMaxLength())
-                    title_layout.setError("輸入內容超過上限");//show
-                else
-                    title_layout.setError(null);//hide
-            }
-        };
         @Override
-        protected void onPause () {
-            super.onPause();
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
         }
+
         @Override
-        protected void onResume () {
-            super.onResume();
+        public void afterTextChanged(Editable editable) {
+            if (title_layout.getEditText().getText().length() > title_layout.getCounterMaxLength())
+                title_layout.setError("輸入內容超過上限");//show
+            else
+                title_layout.setError(null);//hide
         }
+<<<<<<< HEAD
 
 
         private void check_if_null () {
@@ -587,6 +564,8 @@ public class AddItem extends Activity {
                     helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
                     finish();
                 }
+=======
+>>>>>>> master
     };
 
     @Override
@@ -625,3 +604,4 @@ public class AddItem extends Activity {
             }
         }
     }
+}
