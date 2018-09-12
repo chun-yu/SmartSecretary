@@ -16,43 +16,42 @@ import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
 public class Alarm extends Activity {
 
-    private DBHelper helper = null;
+    static DBHelper helper = null;
     private FloatingActionButton fabNewAlarm;
-    private AlarmManager alarmManager;
-    private PendingIntent alarmIntent;
+    //private AlarmManager alarmManager;
+    //private PendingIntent alarmIntent;
     LinearLayout LLV, LLV_display;
     TextView tvAlarmTime;
-    Cursor cursor;
+    static Cursor cursor;
     Switch swAlarm;
-    ArrayList<String> alarmTimeList = new ArrayList<String>();
-    ArrayList<Integer> alarmIDList = new ArrayList<Integer>();
+    public static ArrayList<String> alarmTimeList = new ArrayList<String>();
+    public static ArrayList<String> alarmDateList = new ArrayList<String>();
+    public static ArrayList<Integer> alarmIDList = new ArrayList<Integer>();
     ArrayList<Integer> checkList = new ArrayList<Integer>();
     ArrayList<View> viewList = new ArrayList<View>();
     ArrayList<TextView> tvList = new ArrayList<TextView>();
-    ArrayList<Switch> switchList = new ArrayList<Switch>();
+    public static ArrayList<Switch> switchList = new ArrayList<Switch>();
     String today_date = AddItem.getToday();
     LayoutInflater inflater;
     View view_alarm_display;
+    int YMD[] = new int[3];
+    int nowYear, nowMonth, nowDate, nowHour, nowMin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,47 +64,71 @@ public class Alarm extends Activity {
 
         initView();
         showTime(write_db);
+
+        Bundle b = this.getIntent().getExtras();
+        if (b != null) {
+            int index = b.getInt("index");
+            helper.updateTimeInfo(write_db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), null, null);
+            checkList.set(index, 0);
+            switchList.get(index).setChecked(false);
+        }
+
         fabNewAlarm.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
                 final Calendar c = Calendar.getInstance();
-                int hour = c.get(Calendar.HOUR_OF_DAY);
-                int min = c.get(Calendar.MINUTE);
+                final int nowHour = c.get(Calendar.HOUR_OF_DAY);
+                final int nowMin = c.get(Calendar.MINUTE);
                 new TimePickerDialog(Alarm.this, new TimePickerDialog.OnTimeSetListener(){
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        String timeStr = "";
+                        String timeStr = hourOfDay + ":" + minute;
                         if (minute < 10)
                             timeStr = hourOfDay + ":0" + minute;
+                        if (hourOfDay < 10)
+                            timeStr = "0" + timeStr;
+
+                        setDate(hourOfDay, minute);
+                        String dateStr = "";
+                        if (YMD[1] < 10 && YMD[2] < 10)
+                            dateStr = YMD[0] + "/0" + YMD[1] + "/0" + YMD[2];
+                        else if (YMD[1] < 10)
+                            dateStr = YMD[0] + "/0" + YMD[1] + "/" + YMD[2];
+                        else if (YMD[2] < 10)
+                            dateStr = YMD[0] + "/" + YMD[1] + "/0" + YMD[2];
                         else
-                            timeStr = hourOfDay + ":" + minute;
-                        helper.insertInfo(write_db, timeStr, 1, today_date, null, null);
-                        updateIDList();
-                        Log.d("ID List size", alarmIDList.size() + "");
-                        alarmTimeList.add(timeStr);
-                        checkList.add(1);
-                        final int id = alarmIDList.get(alarmIDList.size()-1);
-                        //setAlarm(hourOfDay, minute, alarmIDList.get(alarmIDList.size()-1));
-                        view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
-                        viewList.add(view_alarm_display);
-                        tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
-                        tvList.add(tvAlarmTime);
-                        swAlarm = (Switch) view_alarm_display.findViewById(R.id.swAlarm);
-                        switchList.add(swAlarm);
-                        LLV_display = (LinearLayout) view_alarm_display.findViewById(R.id.LLV_display);
-                        tvAlarmTime.setText(timeStr);
-                        swAlarm.setChecked(true);
-                        setListener(write_db, swAlarm, tvAlarmTime, alarmIDList.size()-1);
-                        LLV.addView(view_alarm_display);
+                            dateStr = YMD[0] + "/" + YMD[1] + "/" + YMD[2];
+                        if (!isTimeExist(dateStr, timeStr)) {
+                            helper.insertInfo(write_db, timeStr, 1, dateStr, null, null);
+                            updateIDList();
+                            alarmTimeList.add(timeStr);
+                            alarmDateList.add(dateStr);
+                            checkList.add(1);
+                            setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hourOfDay, minute, alarmIDList.get(alarmIDList.size() - 1));
+                            view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
+                            viewList.add(view_alarm_display);
+                            tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
+                            tvList.add(tvAlarmTime);
+                            swAlarm = (Switch) view_alarm_display.findViewById(R.id.swAlarm);
+                            switchList.add(swAlarm);
+                            LLV_display = (LinearLayout) view_alarm_display.findViewById(R.id.LLV_display);
+                            tvAlarmTime.setText(timeStr);
+                            swAlarm.setChecked(true);
+                            setListener(write_db, swAlarm, tvAlarmTime, alarmIDList.size()-1);
+                            LLV.addView(view_alarm_display);
+                        }
+                        else {
+                            Toast.makeText(Alarm.this, "該時間已設定過", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                }, hour, min, false).show();
+                }, nowHour, nowMin, false).show();
             }
         });
     }
 
     private void initView() {
         inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        //alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         fabNewAlarm = (FloatingActionButton)findViewById(R.id.fabNewAlarm);
         LLV = (LinearLayout)findViewById(R.id.LLV);
     }
@@ -115,10 +138,28 @@ public class Alarm extends Activity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if (compoundButton.isChecked()) {
-                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, today_date, null, null);
+                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, alarmDateList.get(index), null, null);
+                    int hour = Integer.parseInt(alarmTimeList.get(index).split(":")[0]);
+                    int min = Integer.parseInt(alarmTimeList.get(index).split(":")[1]);
+
+                    setDate(hour, min);
+                    String dateStr = "";
+                    if (YMD[1] < 10 && YMD[2] < 10)
+                        dateStr = YMD[0] + "/0" + YMD[1] + "/0" + YMD[2];
+                    else if (YMD[1] < 10)
+                        dateStr = YMD[0] + "/0" + YMD[1] + "/" + YMD[2];
+                    else if (YMD[2] < 10)
+                        dateStr = YMD[0] + "/" + YMD[1] + "/0" + YMD[2];
+                    else
+                        dateStr = YMD[0] + "/" + YMD[1] + "/" + YMD[2];
+                    alarmDateList.set(index, dateStr);
+                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, dateStr, null, null);
+                    setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hour, min, alarmIDList.get(index));
                 }
                 else {
-                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 0, today_date, null, null);
+                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), null, null);
+                    cancelAlarm(Alarm.this, alarmIDList.get(index));
+                    Log.d("Switch", "close");
                 }
             }
         });
@@ -128,8 +169,7 @@ public class Alarm extends Activity {
             public void onClick(View v) {
                 Intent intent = new Intent(Alarm.this,AlarmSetting.class);
                 Bundle bundle = new Bundle();
-                bundle.putString("time", alarmTimeList.get(index));
-                bundle.putInt("ID", alarmIDList.get(index));
+                bundle.putInt("index", index);
                 intent.putExtras(bundle);
                 startActivity(intent);
             }
@@ -139,7 +179,7 @@ public class Alarm extends Activity {
             public boolean onLongClick(View v) {
                 try
                 {
-                    showAlertDialog(db, tvList.get(index).getText().toString(), alarmIDList.get(index));
+                    showAlertDialog(db, alarmTimeList.get(index), alarmIDList.get(index));
                 }catch(Exception e)
                 {
                     Log.d("TextView Long click", "error");
@@ -153,6 +193,7 @@ public class Alarm extends Activity {
     private void showTime(final SQLiteDatabase write_db) {
         cursor = helper.getInfo(helper.getReadableDatabase());
         alarmTimeList.clear();
+        alarmDateList.clear();
         alarmIDList.clear();
         viewList.clear();
         switchList.clear();
@@ -173,6 +214,7 @@ public class Alarm extends Activity {
                 view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
                 viewList.add(view_alarm_display);
                 alarmTimeList.add(time);
+                alarmDateList.add(date);
                 alarmIDList.add(id);
                 checkList.add(check);
                 tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
@@ -183,15 +225,31 @@ public class Alarm extends Activity {
                 tvAlarmTime.setText(time);
                 LLV.addView(view_alarm_display);
 
-                setListener(write_db, swAlarm, tvAlarmTime, i);
-
                 if (check == 1) {
                     swAlarm.setChecked(true);
                 }
+
+                setListener(write_db, swAlarm, tvAlarmTime, i);
+
                 cursor.moveToNext();
             }
             //Log.d("getCount() ", cursor.getCount() + "");
         }
+    }
+
+    public static boolean isTimeExist(String newDate, String newTime) {
+        cursor = helper.getInfo(helper.getReadableDatabase());
+        if (cursor != null) {
+            cursor.moveToFirst();
+            for (int i = 0; i < cursor.getCount(); i++) {
+                String time = cursor.getString(1);
+                String date = cursor.getString(3);
+                if (newDate.equals(date) && newTime.equals(time))
+                    return true;
+                cursor.moveToNext();
+            }
+        }
+        return false;
     }
 
     void updateIDList() {
@@ -207,6 +265,42 @@ public class Alarm extends Activity {
         }
     }
 
+    void setDate(int hour, int min) {
+        nowYear = Integer.parseInt(today_date.split("/")[0]);
+        nowMonth = Integer.parseInt(today_date.split("/")[1]);
+        nowDate = Integer.parseInt(today_date.split("/")[2]);
+        final Calendar c = Calendar.getInstance();
+        nowHour = c.get(Calendar.HOUR_OF_DAY);
+        nowMin = c.get(Calendar.MINUTE);
+
+        if (hour < nowHour || (hour == nowHour && min <= nowMin)) {
+            if (nowMonth == 1 || nowMonth == 3 || nowMonth == 5 || nowMonth == 7 || nowMonth == 8 || nowMonth == 10 || nowMonth == 12) {
+                nowDate = (nowDate % 31) + 1;
+                if (nowDate == 1)
+                    nowMonth = (nowMonth % 12) + 1;
+                if (nowMonth == 1)
+                    nowYear++;
+            }
+            else if (nowMonth == 4 || nowMonth == 6 || nowMonth == 9 || nowMonth == 11) {
+                nowDate = (nowDate % 30) + 1;
+                if (nowDate == 1)
+                    nowMonth = (nowMonth % 12) + 1;
+                if (nowMonth == 1)
+                    nowYear++;
+            }
+            else {
+                nowDate = (nowDate % 28) + 1;
+                if (nowDate == 1)
+                    nowMonth = (nowMonth % 12) + 1;
+                if (nowMonth == 1)
+                    nowYear++;
+            }
+        }
+        YMD[0] = nowYear;
+        YMD[1] = nowMonth;
+        YMD[2] = nowDate;
+    }
+
     void showAlertDialog(final SQLiteDatabase db, String timeStr, final int id) {
         new AlertDialog.Builder(Alarm.this)
             .setTitle("Want to delele?")
@@ -215,7 +309,7 @@ public class Alarm extends Activity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     helper.remove_Time(db, id);
-                    cancelAlarm(id);
+                    cancelAlarm(Alarm.this, id);
                     int idx = alarmIDList.indexOf(id);
                     Log.d("ID", id + "");
                     Log.d("ID index", idx + "");
@@ -231,6 +325,7 @@ public class Alarm extends Activity {
                     switchList.remove(idx);
                     tvList.remove(idx);
                     alarmTimeList.remove(idx);
+                    alarmDateList.remove(idx);
                     alarmIDList.remove(idx);
                     for (int i = idx; i < alarmIDList.size(); i++) {
                         setListener(db, switchList.get(i), tvList.get(i), idx);
@@ -245,24 +340,44 @@ public class Alarm extends Activity {
             .show();
     }
 
-    void setAlarm(int hour, int min, int RC) {
-        Intent intent = new Intent(Alarm.this, AlarmReceiver.class);
-        intent.putExtra("msg", "time's_up");
-        alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-        alarmIntent = PendingIntent.getBroadcast(Alarm.this, RC, intent, PendingIntent.FLAG_ONE_SHOT);
+    public static void setAlarm(Context context, int year, int month, int date, int hour, int min, int RC) {
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("msg", "time's_up");
+        int index = alarmIDList.indexOf(RC);
+        bundle.putInt("index", index);
+        intent.putExtras(bundle);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, RC, intent, FLAG_UPDATE_CURRENT);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, hour);
-        calendar.set(Calendar.MINUTE, min);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis()
-                , alarmIntent);
+
+        Log.d("YEAR", year + "");
+        Log.d("MONTH", month + "");
+        Log.d("DATE", date + "");
+        Log.d("HOUR", hour + "");
+        Log.d("MIN", min + "");
+        calendar.set(year, month-1, date, hour, min, 0);
+        //calendar.set(Calendar.HOUR_OF_DAY, hour);
+        //calendar.set(Calendar.MINUTE, min);
+        //alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis()
+                //, alarmIntent);
+        AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(), alarmIntent);
+        alarmManager.setAlarmClock(alarmClockInfo, alarmIntent);
+        String timeStr = hour + ":" + min;
+        if (min < 10)
+            timeStr = hour + ":0" + min;
+        if (hour < 10)
+            timeStr = "0" + timeStr;
+        Toast.makeText(context, "鬧鐘已設定 時間為" + timeStr, Toast.LENGTH_SHORT).show();
     }
 
-    void cancelAlarm(int RC) {
-        Intent intent = new Intent(Alarm.this, AlarmReceiver.class);
-        alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-        alarmIntent = PendingIntent.getBroadcast(Alarm.this, RC, intent, FLAG_ONE_SHOT);
+    public static void cancelAlarm(Context context, int RC) {
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, RC, intent, FLAG_UPDATE_CURRENT);
         alarmManager.cancel(alarmIntent);
         alarmIntent = null;
+        //Toast.makeText(this, "取消鬧鐘", Toast.LENGTH_SHORT).show();
     }
 }

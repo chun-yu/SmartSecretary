@@ -1,6 +1,7 @@
 package com.example.windsound.smartsecretary;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -9,53 +10,85 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
+import java.util.Calendar;
+
 public class AlarmSetting extends Activity {
 
     TextView tvAlarmDate, _tvAlarmTime, tvAlarmSound;
     Button btnBack, btnDetermine;
     private DBHelper helper = null;
-    String today_date = AddItem.getToday();
-    String timeStr = "";
+    String time = "", date = "";
+    int year = 0, month = 0, day = 0, hour = 0, min = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.alarm_setting);
 
+        initView();
+        Bundle bundle = this.getIntent().getExtras();
+        final int index = bundle.getInt("index");
+
         helper = new DBHelper(this);
         final SQLiteDatabase write_db = helper.getWritableDatabase();
 
-        initView();
-        Bundle bundle = this.getIntent().getExtras();
-        final String time =  bundle.getString("time");
-        final int id = bundle.getInt("ID");
+        date = Alarm.alarmDateList.get(index);
+        time = Alarm.alarmTimeList.get(index);
 
-        timeStr = time;
+        year = Integer.parseInt(date.split("/")[0]);
+        month = Integer.parseInt(date.split("/")[1]);
+        month--;
+        day = Integer.parseInt(date.split("/")[2]);
+        hour = Integer.parseInt(time.split(":")[0]);
+        min = Integer.parseInt(time.split(":")[1]);
 
-        Log.d("time", time);
-        Log.d("ID", id + "");
+        tvAlarmDate.setText(date);
+        tvAlarmDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerDialog(AlarmSetting.this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int _year, int _month, int _day) {
+                        year = _year;
+                        month = _month;
+                        day = _day;
+                        if (month < 9 && day < 10)
+                            date = year + "/0" + (month+1) + "/0" + day;
+                        else if (month < 9)
+                            date = year + "/0" + (month+1) + "/" + day;
+                        else if (day < 10)
+                            date = year + "/" + (month+1) + "/0" + day;
+                        else
+                            date = year + "/" + (month+1) + "/" + day;
+                        tvAlarmDate.setText(date);
+                    }
+                }, year, month, day).show();
+            }
+        });
 
-        tvAlarmDate.setText(today_date);
         _tvAlarmTime.setText(time);
         _tvAlarmTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int hour = Integer.parseInt(time.split(":")[0]);
-                int min = Integer.parseInt(time.split(":")[1]);
                 new TimePickerDialog(AlarmSetting.this, new TimePickerDialog.OnTimeSetListener(){
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                         if (minute < 10)
-                            timeStr = hourOfDay + ":0" + minute;
+                            time = hourOfDay + ":0" + minute;
                         else
-                            timeStr = hourOfDay + ":" + minute;
-                        _tvAlarmTime.setText(timeStr);
+                            time = hourOfDay + ":" + minute;
+                        if (hourOfDay < 10)
+                            time = "0" + time;
+                        hour = hourOfDay;
+                        min = minute;
+                        _tvAlarmTime.setText(time);
                     }
                 }, hour, min, false).show();
             }
@@ -70,10 +103,21 @@ public class AlarmSetting extends Activity {
         btnDetermine.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
-                helper.updateTimeInfo(write_db, id, timeStr, 1, today_date, null, null);
-                Toast.makeText(AlarmSetting.this, "時間已修改為 : " + timeStr, Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(AlarmSetting.this,Alarm.class);
-                startActivity(intent);
+                if (!Alarm.isTimeExist(date, time)) {
+                    helper.updateTimeInfo(write_db, Alarm.alarmIDList.get(index), time, 1, date, null, null);
+                    Toast.makeText(AlarmSetting.this, "時間已修改為 " + time, Toast.LENGTH_SHORT).show();
+                    Alarm.cancelAlarm(AlarmSetting.this, Alarm.alarmIDList.get(index));
+                    Alarm.setAlarm(AlarmSetting.this, year, month+1, day, hour, min, Alarm.alarmIDList.get(index));
+                    Intent intent = new Intent(AlarmSetting.this, Alarm.class);
+                    startActivity(intent);
+                }
+                else {
+                    Toast.makeText(AlarmSetting.this, "該時間已設定過", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                //Bundle bundle = new Bundle();
+                //bundle.putInt("index", index);
+                //intent.putExtras(bundle);
             }
         });
     }

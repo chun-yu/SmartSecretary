@@ -16,7 +16,7 @@
             android:id="@+id/tvAlarmTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_weight="9"
             android:gravity="center"
             android:text="time"
             android:textSize="30sp" />
