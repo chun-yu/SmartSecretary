@@ -1,11 +1,13 @@
 package com.example.windsound.smartsecretary;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -23,6 +25,7 @@ public class AlarmWake extends Activity {
     int maxVolume = 100;
     Cursor cursor;
     PowerManager.WakeLock wl;
+    final AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +49,15 @@ public class AlarmWake extends Activity {
         final int index = findWhichAlarm(nowYear,nowMonth+1, nowDay, nowHour, nowMin);
         Log.d("index", index + "");
 
-        mp = new MediaPlayer();
-        mp = MediaPlayer.create(this, songWakeUp);
-        mp.setVolume(maxVolume, maxVolume);
-        mp.setLooping(true);
-        mp.start();
+        am.setStreamVolume(AudioManager.STREAM_ALARM,
+                am.getStreamMaxVolume(AudioManager.STREAM_ALARM), AudioManager.FLAG_PLAY_SOUND);
+        am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+
+        //mp = new MediaPlayer();
+        //mp = MediaPlayer.create(this, songWakeUp);
+        //mp.setVolume(maxVolume, maxVolume);
+        //mp.setLooping(true);
+        //mp.start();
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wl = pm.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.SCREEN_DIM_WAKE_LOCK, "bright");

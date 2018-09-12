@@ -169,7 +169,6 @@ public class AddItem extends Activity {
         }
     }
 
-<<<<<<< HEAD
     /*
     private void startOCR(Uri outputfileDir) {
         try {
@@ -183,7 +182,7 @@ public class AddItem extends Activity {
         }
      */
         @Override
-        protected void onActivityResult ( int requestCode, int resultCode, Intent data){
+        protected void onActivityResult ( int requestCode, int resultCode, Intent data) {
             if (requestCode == 100 && resultCode == Activity.RESULT_OK) {                 //從這邊開始
                 prepareTessData();
                 startOCR(outputfileDir);
@@ -197,8 +196,14 @@ public class AddItem extends Activity {
                         content_text.setText(text.get(0));
                     }
                     break;
+<<<<<<< Updated upstream
 =======
 >>>>>>> master
+=======
+                }
+            }
+        }
+>>>>>>> Stashed changes
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -207,7 +212,6 @@ public class AddItem extends Activity {
                 if (resultCode == RESULT_OK && null != data) {
                     ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     content_text.setText(text.get(0));
->>>>>>> master
                 }
 <<<<<<< HEAD
                 break;
@@ -241,7 +245,6 @@ public class AddItem extends Activity {
 >>>>>>> master
             }
         }
-<<<<<<< HEAD
         private void prepareTessData ()
         {                                             //一樣不確定路徑有沒有抓到
             try {
@@ -262,7 +265,6 @@ public class AddItem extends Activity {
                         }
                         in.close();
                         out.close();
-=======
     }
 
     private void checkPermission() {
@@ -343,7 +345,6 @@ public class AddItem extends Activity {
                     int len ;
                     while(( len = in.read(buff)) > 0){
                         out.write(buff,0,len);
->>>>>>> master
                     }
                 }
             } catch (Exception e) {
@@ -377,7 +378,6 @@ public class AddItem extends Activity {
         }
 >>>>>>> master
 
-<<<<<<< HEAD
 
         private String getText (Bitmap bitmap){                                         //最後的部分
             try {
@@ -395,7 +395,6 @@ public class AddItem extends Activity {
             }
             tessbaseAPI.end();
             return retStr;
-=======
     private String getText(Bitmap bitmap) {                                         //最後的部分
         final TessBaseAPI tessBaseAPI = new TessBaseAPI();
         String dataPath = getExternalFilesDir("/").getPath() + "/";
@@ -414,10 +413,8 @@ public class AddItem extends Activity {
             retStr = tessbaseAPI.getUTF8Text();
         }catch(Exception e){
             Log.e(TAG,e.getMessage());
->>>>>>> master
         }
 
-<<<<<<< HEAD
         public void showDatePickerDialog () {
             // 設定初始日期
             Calendar c = Calendar.getInstance();
@@ -449,8 +446,11 @@ public class AddItem extends Activity {
         }
         public static String getNewTime () {
             return sdf2.format(Calendar.getInstance().getTime());
+<<<<<<< Updated upstream
 =======
 >>>>>>> master
+=======
+>>>>>>> Stashed changes
     public static  void showDatePickerDialog(final Button button, final Context context) {
         // 設定初始日期
         Calendar c = Calendar.getInstance();
@@ -510,7 +510,6 @@ public class AddItem extends Activity {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
->>>>>>> master
         }
         public void showTimePickerDialog () {
             Calendar c = Calendar.getInstance();
@@ -562,7 +561,6 @@ public class AddItem extends Activity {
         protected void onResume () {
             super.onResume();
         }
-<<<<<<< HEAD
 
 
         private void check_if_null () {
@@ -589,7 +587,6 @@ public class AddItem extends Activity {
                     helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
                     finish();
                 }
-=======
     };
 
     @Override
@@ -625,7 +622,6 @@ public class AddItem extends Activity {
                 toast.show();
                 helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0,date_view.getText().toString(),title_text.getText().toString(), content_text.getText().toString());
                 finish();
->>>>>>> master
             }
         }
     }
