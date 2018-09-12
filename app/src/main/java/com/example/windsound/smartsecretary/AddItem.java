@@ -147,66 +147,6 @@ public class AddItem extends Activity {
             }
         });
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
-    private void startCameraActivity(){                                         //相機        "/imgs"是不確定的用法
-        try{
-            String imagePath = DATA_PATH + "/imgs";
-            File dir = new File(imagePath);
-            if(!dir.exists()){
-                dir.mkdir();
-            }
-            String imageFilePath = imagePath + "/ocr.jpg";
-            outputfileDir = Uri.fromFile(new File(imageFilePath));
-            final Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,outputfileDir);
-            if(pictureIntent.resolveActivity(getPackageManager()) != null){
-                startActivityForResult(pictureIntent,100);
-            }
-        }catch(Exception e){
-            Log.e(TAG,e.getMessage());
-        }
-    }
-
-    /*
-    private void startOCR(Uri outputfileDir) {
-        try {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 7;
-            Bitmap bitmap = BitmapFactory.decodeFile(outputfileDir.getPath(), options);
-            String result = this.getText(bitmap);
-            content_text.setText(result);
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-     */
-        @Override
-        protected void onActivityResult ( int requestCode, int resultCode, Intent data) {
-            if (requestCode == 100 && resultCode == Activity.RESULT_OK) {                 //從這邊開始
-                prepareTessData();
-                startOCR(outputfileDir);
-            } else
-                Toast.makeText(getApplicationContext(), "Image problem", Toast.LENGTH_SHORT).show();   //到這邊
-            super.onActivityResult(requestCode, resultCode, data);
-            switch (requestCode) {
-                case RESULT_SPEECH: {
-                    if (resultCode == RESULT_OK && null != data) {
-                        ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                        content_text.setText(text.get(0));
-                    }
-                    break;
-<<<<<<< Updated upstream
-=======
->>>>>>> master
-=======
-                }
-            }
-        }
->>>>>>> Stashed changes
-=======
->>>>>>> master
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -249,29 +189,6 @@ public class AddItem extends Activity {
                 break;
             }
         }
-<<<<<<< HEAD
-        private void prepareTessData ()
-        {                                             //一樣不確定路徑有沒有抓到
-            try {
-                File dir = new File(DATA_PATH + TESS_DATA);
-                if (!dir.exists()) {
-                    dir.mkdir();
-                }
-                String fileList[] = getAssets().list("");
-                for (String fileName : fileList) {
-                    String pathToDataFile = DATA_PATH + TESS_DATA + "/" + fileName;
-                    if (!(new File(pathToDataFile)).exists()) {
-                        InputStream in = getAssets().open(fileName);
-                        OutputStream out = new FileOutputStream(pathToDataFile);
-                        byte[] buff = new byte[1024];
-                        int len;
-                        while ((len = in.read(buff)) > 0) {
-                            out.write(buff, 0, len);
-                        }
-                        in.close();
-                        out.close();
-=======
->>>>>>> master
     }
 
     private void checkPermission() {
@@ -371,41 +288,6 @@ public class AddItem extends Activity {
         content_text.setText(result);                                               //這行不確定有沒有打對
     }
 
-<<<<<<< HEAD
-
-        private void startOCR (Uri imageUri)
-        {                                                //OCR
-            try {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 7;
-                Bitmap bitmap = BitmapFactory.decodeFile(imageUri.getPath(), options);
-                String result = this.getText(bitmap);
-                content_text.setText(result);                                               //這行不確定有沒有打對
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
-            }
-        }
->>>>>>> master
-
-
-        private String getText (Bitmap bitmap){                                         //最後的部分
-            try {
-                tessbaseAPI = new TessBaseAPI();
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
-            }
-            tessbaseAPI.init(DATA_PATH, "chi_tra");                                  //這行應該是抓中文辨識吧?
-            tessbaseAPI.setImage(bitmap);
-            String retStr = "No result";
-            try {
-                retStr = tessbaseAPI.getUTF8Text();
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
-            }
-            tessbaseAPI.end();
-            return retStr;
-=======
->>>>>>> master
     private String getText(Bitmap bitmap) {                                         //最後的部分
         final TessBaseAPI tessBaseAPI = new TessBaseAPI();
         String dataPath = getExternalFilesDir("/").getPath() + "/";
@@ -418,52 +300,6 @@ public class AddItem extends Activity {
     }
 
 
-<<<<<<< HEAD
-=======
-        try{
-            retStr = tessbaseAPI.getUTF8Text();
-        }catch(Exception e){
-            Log.e(TAG,e.getMessage());
-        }
-
-        public void showDatePickerDialog () {
-            // 設定初始日期
-            Calendar c = Calendar.getInstance();
-            String nowDate = date_view.getText().toString();
-            try {
-                c.setTime(sdf.parse(nowDate));
-                // 跳出日期選擇器
-                DatePickerDialog dpd = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        // 完成選擇，顯示日期
-                        if (monthOfYear <= 8 && dayOfMonth <= 9) {
-                            date_view.setText(year + "/0" + (monthOfYear + 1) + "/0" + dayOfMonth);
-                        } else if (monthOfYear <= 8 && dayOfMonth > 9) {
-                            date_view.setText(year + "/0" + (monthOfYear + 1) + "/" + dayOfMonth);
-                        } else if (monthOfYear > 8 && dayOfMonth <= 9) {
-                            date_view.setText(year + "/" + (monthOfYear + 1) + "/0" + dayOfMonth);
-                        } else {
-                            date_view.setText(year + "/" + (monthOfYear + 1) + "/" + dayOfMonth);
-                        }
-                    }
-                }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
-                dpd.show();
-            } catch (Exception e) {
-                date_view.setText(getToday());
-            }
-        }
-        public static String getToday () {
-            return sdf.format(Calendar.getInstance().getTime());
-        }
-        public static String getNewTime () {
-            return sdf2.format(Calendar.getInstance().getTime());
-<<<<<<< Updated upstream
-=======
->>>>>>> master
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> master
     public static  void showDatePickerDialog(final Button button, final Context context) {
         // 設定初始日期
         Calendar c = Calendar.getInstance();
@@ -537,35 +373,6 @@ public class AddItem extends Activity {
             else
                 title_layout.setError(null);//hide
         }
-<<<<<<< HEAD
-
-
-        private void check_if_null () {
-            final SQLiteDatabase write_db = helper.getWritableDatabase();
-            String s1 = title_text.getText().toString();
-            String s2 = content_text.getText().toString();
-            if (s1.equals("") && !s2.equals("")) {
-                Toast.makeText(AddItem.this, getString(R.string.please_title), Toast.LENGTH_LONG).show();
-            } else if (!s1.equals("") && s2.equals("")) {
-                Toast.makeText(AddItem.this, getString(R.string.content), Toast.LENGTH_LONG).show();
-            } else if (s1.equals("") && s2.equals("")) {
-                Toast.makeText(AddItem.this, getString(R.string.please_title) + "\n" + getString(R.string.content), Toast.LENGTH_LONG).show();
-            } else {
-                if (alarm_switch.isChecked()) {
-                    Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
-                    helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
-                    finish();
-                } else {
-                    Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
-                    helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
-                    finish();
-                }
-=======
->>>>>>> master
     };
 
     @Override
