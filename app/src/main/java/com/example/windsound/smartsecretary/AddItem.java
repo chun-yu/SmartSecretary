@@ -1,11 +1,17 @@
 package com.example.windsound.smartsecretary;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,6 +23,9 @@ import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
@@ -25,8 +34,6 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.Switch;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import android.util.Log;
@@ -34,19 +41,24 @@ import com.googlecode.tesseract.android.TessBaseAPI;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 public class AddItem extends Activity {
     private Button back_btn,date_view,finish_add_item,btn_clock,btn_clock_view,photo_btn,voice_btn;
     private Switch alarm_switch;
     private static final String TAG = AddItem.class.getSimpleName();             //從這邊往下數五行       應該是要找路徑可是我不知道有沒有寫對
     public static final String TESS_DATA = "/tessdata";
-    private TessBaseAPI tessbaseAPI;
-    private Uri outputfileDir;
+
+    private Uri outputFileDir;
+    private String mCurrentPhotoPath;
     private static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() + "/Tess";
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
     private static SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm");
@@ -55,15 +67,18 @@ public class AddItem extends Activity {
     private DBHelper helper = null;
 
     protected static final int RESULT_SPEECH = 1;
+    protected static final int PHOTO = 3;
+    protected static final int DO_TESS = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_item);
-        this.findViewById(R.id.photo_btn).setOnClickListener(new View.OnClickListener() {
+        photo_btn= (Button) findViewById(R.id.photo_btn);
+        photo_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {            //按button開啟相機
-                startCameraActivity();
+                checkPermission();
             }
         });
         helper = new DBHelper(this);
@@ -132,32 +147,8 @@ public class AddItem extends Activity {
             }
         });
     }
-
-    private void startCameraActivity(){                                         //相機        "/imgs"是不確定的用法
-        try{
-            String imagePath = DATA_PATH + "/imgs";
-            File dir = new File(imagePath);
-            if(!dir.exists()){
-                dir.mkdir();
-            }
-            String imageFilePath = imagePath + "/ocr.jpg";
-            outputfileDir = Uri.fromFile(new File(imageFilePath));
-            final Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,outputfileDir);
-            if(pictureIntent.resolveActivity(getPackageManager()) != null){
-                startActivityForResult(pictureIntent,100);
-            }
-        }catch(Exception e){
-            Log.e(TAG,e.getMessage());
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == 100 && resultCode == Activity.RESULT_OK){                 //從這邊開始
-            prepareTessData();
-            startOCR(outputfileDir);
-        }else Toast.makeText(getApplicationContext(), "Image problem", Toast.LENGTH_SHORT).show();   //到這邊
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case RESULT_SPEECH: {
@@ -166,25 +157,113 @@ public class AddItem extends Activity {
                     content_text.setText(text.get(0));
                 }
                 break;
+            }case DO_TESS: {
+                if (resultCode == Activity.RESULT_OK) {
+                    prepareTessData();
+                    startOCR(outputFileDir);
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    Toast.makeText(getApplicationContext(), "Result canceled.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Activity result failed.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }case PHOTO: {
+                if (resultCode == Activity.RESULT_OK) {
+                    prepareTessData();
+                    Uri uri = data.getData();
+                    String[] proj = { MediaStore.Images.Media.DATA };
+                    Cursor actualimagecursor = managedQuery(uri,proj,null,null,null);
+                    int actual_image_column_index = actualimagecursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                    actualimagecursor.moveToFirst();
+                    mCurrentPhotoPath = actualimagecursor.getString(actual_image_column_index);
+                    startOCR(outputFileDir);
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    Toast.makeText(getApplicationContext(), "Result canceled.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Activity result failed.", Toast.LENGTH_SHORT).show();
+                }
+                break;
             }
         }
     }
 
+    private void checkPermission() {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 120);
+        }
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 121);
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(AddItem.this);
+        builder.setMessage("照片選取方式")
+                .setPositiveButton("相機拍照", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dispatchTakePictureIntent();
+                    }
+                })
+                .setNegativeButton("相簿選取", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent();
+                        intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+                        startActivityForResult(intent, PHOTO);
+                    }
+                });
+        AlertDialog logout_dialog = builder.create();
+        logout_dialog.show();
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(AddItem.this,
+                        BuildConfig.APPLICATION_ID + ".provider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, DO_TESS);
+            }
+        }
+    }
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
     private void prepareTessData(){                                             //一樣不確定路徑有沒有抓到
         try{
-            File dir = new File(DATA_PATH + TESS_DATA);
+            File dir = getExternalFilesDir(TESS_DATA);
             if(!dir.exists()){
-                dir.mkdir();
+                if (!dir.mkdir()) {
+                    Toast.makeText(getApplicationContext(), "The folder " + dir.getPath() + "was not created", Toast.LENGTH_SHORT).show();
+                }
             }
             String fileList[] = getAssets().list("");
             for(String fileName : fileList){
-                String pathToDataFile = DATA_PATH + TESS_DATA + "/" + fileName;
+                String pathToDataFile = dir + "/" + fileName;
                 if(!(new File(pathToDataFile)).exists()){
                     InputStream in = getAssets().open(fileName);
                     OutputStream out = new FileOutputStream(pathToDataFile);
-                    byte[] buff = new byte[1024];
-                    int len;
-                    while ((len = in.read(buff))>0){
+                    byte [] buff = new byte[1024];
+                    int len ;
+                    while(( len = in.read(buff)) > 0){
                         out.write(buff,0,len);
                     }
                     in.close();
@@ -195,36 +274,26 @@ public class AddItem extends Activity {
             Log.e(TAG,e.getMessage());
         }
     }
-
-    private void startOCR(Uri imageUri){                                                //OCR
-        try{
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 7;
-            Bitmap bitmap = BitmapFactory.decodeFile(imageUri.getPath(),options);
+    private void startOCR(Uri imageUri){//OCR
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = false;
+        options.inSampleSize = 6;
+            Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath,options);
             String result = this.getText(bitmap);
             content_text.setText(result);                                               //這行不確定有沒有打對
-        }catch (Exception e){
-            Log.e(TAG,e.getMessage());
-        }
     }
 
     private String getText(Bitmap bitmap) {                                         //最後的部分
-        try{
-            tessbaseAPI = new TessBaseAPI();
-        }catch (Exception e){
-            Log.e(TAG,e.getMessage());
-        }
-        tessbaseAPI.init(DATA_PATH,"chi_tra");                                  //這行應該是抓中文辨識吧?
-        tessbaseAPI.setImage(bitmap);
+        final TessBaseAPI tessBaseAPI = new TessBaseAPI();
+        String dataPath = getExternalFilesDir("/").getPath() + "/";
+        tessBaseAPI.init(dataPath,"chi_tra");                                  //這行應該是抓中文辨識吧?
+        tessBaseAPI.setImage(bitmap);
         String retStr = "No result";
-        try{
-            retStr = tessbaseAPI.getUTF8Text();
-        }catch(Exception e){
-            Log.e(TAG,e.getMessage());
-        }
-        tessbaseAPI.end();
+        retStr = tessBaseAPI.getUTF8Text();
+        tessBaseAPI.end();
         return retStr;
     }
+
 
     public static  void showDatePickerDialog(final Button button, final Context context) {
         // 設定初始日期
