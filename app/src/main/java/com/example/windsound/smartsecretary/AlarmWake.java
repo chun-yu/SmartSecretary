@@ -25,7 +25,6 @@ public class AlarmWake extends Activity {
     int maxVolume = 100;
     Cursor cursor;
     PowerManager.WakeLock wl;
-    final AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +48,11 @@ public class AlarmWake extends Activity {
         final int index = findWhichAlarm(nowYear,nowMonth+1, nowDay, nowHour, nowMin);
         Log.d("index", index + "");
 
-        am.setStreamVolume(AudioManager.STREAM_ALARM,
-                am.getStreamMaxVolume(AudioManager.STREAM_ALARM), AudioManager.FLAG_PLAY_SOUND);
-        am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-
-        //mp = new MediaPlayer();
-        //mp = MediaPlayer.create(this, songWakeUp);
-        //mp.setVolume(maxVolume, maxVolume);
-        //mp.setLooping(true);
-        //mp.start();
+        mp = new MediaPlayer();
+        mp = MediaPlayer.create(this, songWakeUp);
+        mp.setVolume(maxVolume, maxVolume);
+        mp.setLooping(true);
+        mp.start();
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wl = pm.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.SCREEN_DIM_WAKE_LOCK, "bright");

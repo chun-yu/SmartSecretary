@@ -71,6 +71,7 @@ public class AddItem extends Activity {
     protected static final int DO_TESS = 4;
     private String train_language = "chi_tra";
     private int putin_null_dbID;
+    int int_chose_time;int int_now;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,8 +107,15 @@ public class AddItem extends Activity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if (compoundButton.isChecked()) {
-                    alarm_switch.setText("on");
-                    Toast.makeText(AddItem.this, getString(R.string.open_Alaem), Toast.LENGTH_SHORT).show();
+                    chose_now_time_compare();
+                    if(int_now>=int_chose_time){
+                        alarm_switch.setChecked(false);
+                        alarm_switch.setText("off");
+                        Toast.makeText(AddItem.this, getString(R.string.brfore_time)+"\n"+getString(R.string.reset_time), Toast.LENGTH_SHORT).show();
+                    }else{
+                        alarm_switch.setText("on");
+                        Toast.makeText(AddItem.this, getString(R.string.open_Alaem), Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     alarm_switch.setText("off");
                     Toast.makeText(AddItem.this, getString(R.string.close_Alaem), Toast.LENGTH_SHORT).show();
@@ -119,6 +127,15 @@ public class AddItem extends Activity {
         date_view.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 showDatePickerDialog(date_view,AddItem.this);
+                chose_now_time_compare();
+                if(int_now>=int_chose_time){
+                    alarm_switch.setChecked(false);
+                    alarm_switch.setText("off");
+                    Toast.makeText(AddItem.this, getString(R.string.brfore_time), Toast.LENGTH_SHORT).show();
+                }else{
+                    alarm_switch.setText("on");
+                    Toast.makeText(AddItem.this, getString(R.string.open_Alaem), Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -128,11 +145,29 @@ public class AddItem extends Activity {
         btn_clock_view.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 showTimePickerDialog(btn_clock_view,AddItem.this);
+                chose_now_time_compare();
+                if(int_now>=int_chose_time){
+                    alarm_switch.setChecked(false);
+                    alarm_switch.setText("off");
+                    Toast.makeText(AddItem.this, getString(R.string.brfore_time), Toast.LENGTH_SHORT).show();
+                }else{
+                    alarm_switch.setText("on");
+                    Toast.makeText(AddItem.this, getString(R.string.open_Alaem), Toast.LENGTH_SHORT).show();
+                }
             }
         });
         btn_clock.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 showTimePickerDialog(btn_clock_view,AddItem.this);
+                chose_now_time_compare();
+                if(int_now>=int_chose_time){
+                    alarm_switch.setChecked(false);
+                    alarm_switch.setText("off");
+                    Toast.makeText(AddItem.this, getString(R.string.brfore_time), Toast.LENGTH_SHORT).show();
+                }else{
+                    alarm_switch.setText("on");
+                    Toast.makeText(AddItem.this, getString(R.string.open_Alaem), Toast.LENGTH_SHORT).show();
+                }
             }
         });
         title_layout= (TextInputLayout) findViewById(R.id.title_layout);
@@ -349,13 +384,12 @@ public class AddItem extends Activity {
             new TimePickerDialog(context,android.R.style.Theme_Holo_Light_Dialog ,new TimePickerDialog.OnTimeSetListener(){
                 @Override
                 public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                    String timeStr = "";
-                    if (minute < 10){
+                    String timeStr = hourOfDay + ":" + minute;
+                    if (minute < 10)
                         timeStr = hourOfDay + ":0" + minute;
-                        button.setText(timeStr);}
-                    else{
-                        timeStr = hourOfDay + ":" + minute;
-                        button.setText(timeStr);}
+                    if (hourOfDay < 10)
+                        timeStr = "0" + timeStr;
+                    button.setText(timeStr);
                 }
             }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show();
         } catch (Exception e) {
@@ -393,6 +427,9 @@ public class AddItem extends Activity {
         final SQLiteDatabase write_db = helper.getWritableDatabase();
         String s1 = title_text.getText().toString();
         String s2 = content_text.getText().toString();
+        String[] splitarrary = new String[3];String[] splitarrary2 = new String[2];
+        splitarrary = date_view.getText().toString().split("/");
+        splitarrary2 = btn_clock_view.getText().toString().split(":");
         if(s1.equals("") && !s2.equals("")){
             Toast.makeText(AddItem.this,getString(R.string.please_title), Toast.LENGTH_LONG).show();
         }else if(!s1.equals("") && s2.equals("")){
@@ -410,6 +447,7 @@ public class AddItem extends Activity {
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
                         helper.updateTimeInfo(write_db, putin_null_dbID, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
+                        Alarm.setAlarm(AddItem.this,Integer.parseInt(splitarrary[0]),Integer.parseInt(splitarrary[1]),Integer.parseInt(splitarrary[2]),Integer.parseInt(splitarrary2[0]),Integer.parseInt(splitarrary2[1]),putin_null_dbID);
                         finish();
                     } else {
                         Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
@@ -424,6 +462,7 @@ public class AddItem extends Activity {
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
                         helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
+                        Alarm.setAlarm(AddItem.this,Integer.parseInt(splitarrary[0]),Integer.parseInt(splitarrary[1]),Integer.parseInt(splitarrary[2]),Integer.parseInt(splitarrary2[0]),Integer.parseInt(splitarrary2[1]),helper.getDBcount());
                         finish();
                     } else {
                         Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
@@ -449,5 +488,16 @@ public class AddItem extends Activity {
             }
         }
         return false;
+    }
+    private void chose_now_time_compare(){
+        String[] splitarrary = new String[3];String[] splitarrary2 = new String[2];
+        splitarrary = sdf.format(Calendar.getInstance().getTime()).split("/");
+        splitarrary2 = sdf2.format(Calendar.getInstance().getTime()).split(":");
+        int_now= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+        splitarrary = date_view.getText().toString().split("/");
+        splitarrary2 = btn_clock_view.getText().toString().split(":");
+        int_chose_time= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
     }
 }

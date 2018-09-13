@@ -76,7 +76,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public int getDBcount() {
         int result = 0;
         Cursor cursor = getWritableDatabase().rawQuery("SELECT COUNT(*) FROM " + TABLE_NAME, null);
-        if (cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
             result = cursor.getInt(0);
         }
         return result;

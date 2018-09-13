@@ -1,12 +1,13 @@
 package com.example.windsound.smartsecretary;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class SmartSecretary extends AppCompatActivity {
+public class SmartSecretary extends Activity {
     private Button new_button;
     private Button my_alarm_button;
     private Button my_note_button;
