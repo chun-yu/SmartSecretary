@@ -24,7 +24,7 @@
     <string name="remind">提 醒</string>
     <string name="please_content">請 輸 入 內 容</string>
     <string name="please_title">請 輸 入 標 題</string>
-    <string name="input_outline">輸入達到上限</string>
+    <string name="input_outline">輸入內容達到上限</string>
     <string name="open_Alaem">開 啟 提 醒</string>
     <string name="close_Alaem">關 閉 提 醒</string>
     <string name="new_success">新 增 提 醒</string>

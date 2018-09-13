@@ -352,7 +352,7 @@ public class memo extends Activity {
             Toast.makeText(memo.this,getString(R.string.please_title)+"\n"+getString(R.string.content), Toast.LENGTH_LONG).show();
         }else{
             if(s1.length()>10 || s2.length()>150){
-                Toast.makeText(memo.this,getString(R.string.input_outline)+"\n"+getString(R.string.content), Toast.LENGTH_LONG).show();
+                Toast.makeText(memo.this,getString(R.string.input_outline), Toast.LENGTH_LONG).show();
             }else {
                 if (check > 0) {
                     Toast toast = Toast.makeText(memo.this, s1 + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);

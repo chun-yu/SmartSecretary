@@ -69,7 +69,8 @@ public class AddItem extends Activity {
     protected static final int RESULT_SPEECH = 1;
     protected static final int PHOTO = 3;
     protected static final int DO_TESS = 4;
-
+    private String train_language = "chi_tra";
+    private int putin_null_dbID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -172,13 +173,9 @@ public class AddItem extends Activity {
                     prepareTessData();
                     Uri uri = data.getData();
                     String[] proj = { MediaStore.Images.Media.DATA };
-
                     Cursor actualimagecursor = managedQuery(uri,proj,null,null,null);
-
                     int actual_image_column_index = actualimagecursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-
                     actualimagecursor.moveToFirst();
-
                     mCurrentPhotoPath = actualimagecursor.getString(actual_image_column_index);
                     startOCR(outputFileDir);
                 } else if (resultCode == Activity.RESULT_CANCELED) {
@@ -192,6 +189,7 @@ public class AddItem extends Activity {
     }
 
     private void checkPermission() {
+        String language[] = {"中文", "English"};
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 120);
         }
@@ -199,7 +197,18 @@ public class AddItem extends Activity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 121);
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(AddItem.this);
-        builder.setMessage("照片選取方式")
+        builder.setTitle("照片選取方式");
+        builder.setSingleChoiceItems(language, 0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //根据which决定选择了哪一个子项
+                        if(which==0){
+                            train_language = "chi_tra";
+                        }else{
+                            train_language = "eng";
+                        }
+                    }
+                })
                 .setPositiveButton("相機拍照", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dispatchTakePictureIntent();
@@ -209,7 +218,6 @@ public class AddItem extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent();
                         intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-
                         startActivityForResult(intent, PHOTO);
                     }
                 });
@@ -291,7 +299,7 @@ public class AddItem extends Activity {
     private String getText(Bitmap bitmap) {                                         //最後的部分
         final TessBaseAPI tessBaseAPI = new TessBaseAPI();
         String dataPath = getExternalFilesDir("/").getPath() + "/";
-        tessBaseAPI.init(dataPath,"chi_tra");                                  //這行應該是抓中文辨識吧?
+        tessBaseAPI.init(dataPath,train_language);                                  //這行應該是抓中文辨識吧?
         tessBaseAPI.setImage(bitmap);
         String retStr = "No result";
         retStr = tessBaseAPI.getUTF8Text();
@@ -358,14 +366,10 @@ public class AddItem extends Activity {
     private TextWatcher mTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
         }
-
         @Override
         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
         }
-
         @Override
         public void afterTextChanged(Editable editable) {
             if (title_layout.getEditText().getText().length() > title_layout.getCounterMaxLength())
@@ -396,19 +400,54 @@ public class AddItem extends Activity {
         }else if(s1.equals("") && s2.equals("")){
             Toast.makeText(AddItem.this,getString(R.string.please_title)+"\n"+getString(R.string.content), Toast.LENGTH_LONG).show();
         }else{
-            if(alarm_switch.isChecked()){
-                Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +"\n"+getString(R.string.open_Alaem), Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER,0,0);
-                toast.show();
-                helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1,date_view.getText().toString(),title_text.getText().toString(), content_text.getText().toString());
-                finish();
-            }else{
-                Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +"\n"+getString(R.string.close_Alaem), Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER,0,0);
-                toast.show();
-                helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0,date_view.getText().toString(),title_text.getText().toString(), content_text.getText().toString());
-                finish();
+            if(s1.length()>10 || s2.length()>150){
+                Toast toast = Toast.makeText(AddItem.this,getString(R.string.input_outline), Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER, 0, 0);toast.show();
+            }else {
+                if(find_if_have()){
+                    if (alarm_switch.isChecked()) {
+                        Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                        helper.updateTimeInfo(write_db, putin_null_dbID, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
+                        finish();
+                    } else {
+                        Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                        helper.updateTimeInfo(write_db, putin_null_dbID, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
+                        finish();
+                    }
+                }else{
+                    if (alarm_switch.isChecked()) {
+                        Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                        helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
+                        finish();
+                    } else {
+                        Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                        helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
+                        finish();
+                    }
+                }
             }
         }
+    }
+    private boolean find_if_have(){
+        Cursor res = helper.getInfoData();
+        while (res.moveToNext()) {
+            String text1 = res.getString(4);
+            String text2 = res.getString(5);
+            String db_time = res.getString(1);
+            String clock_time = btn_clock_view.getText().toString();
+            if((text1 == null || text2 == null) && clock_time.equals(db_time)){
+                putin_null_dbID = res.getInt(0);
+                return true;
+            }
+        }
+        return false;
     }
 }
