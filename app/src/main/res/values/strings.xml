@@ -7,6 +7,7 @@
     <string name="my_alarm">我 的 鬧 鐘</string>
     <string name="my_note">記 事 本</string>
     <string name="alarm_setting">鬧 鐘 設 定</string>
+    <string name="music_setting">鈴 聲 設 定</string>
     <string name="voice">語 音</string>
     <string name="image">照 片</string>
     <string name="date_num">2018/08/08</string>
@@ -31,6 +32,7 @@
     <string name="brfore_time">此設定" 時間已過 "，無法開啟提醒</string>
     <string name="reset_time">請重新設定日期時間</string>
     <string name="close_clock">關閉鬧鐘</string>
+    <string name="sound_default">預設</string>
     <string name="monday">星期一</string>
     <string name="tuesday">星期二</string>
     <string name="wednesday">星期三</string>

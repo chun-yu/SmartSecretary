@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,7 +26,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
 public class Alarm extends Activity {
@@ -47,6 +45,9 @@ public class Alarm extends Activity {
     ArrayList<View> viewList = new ArrayList<View>();
     ArrayList<TextView> tvList = new ArrayList<TextView>();
     public static ArrayList<Switch> switchList = new ArrayList<Switch>();
+    ArrayList<String> titleList = new ArrayList<String>();
+    public static ArrayList<String> songList = new ArrayList<String>();
+    public static ArrayList<String> songPathList = new ArrayList<String>();
     String today_date = AddItem.getToday();
     LayoutInflater inflater;
     View view_alarm_display;
@@ -68,7 +69,7 @@ public class Alarm extends Activity {
         Bundle b = this.getIntent().getExtras();
         if (b != null) {
             int index = b.getInt("index");
-            helper.updateTimeInfo(write_db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), null, null);
+            helper.updateTimeInfo(write_db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), null, null, songList.get(index), songPathList.get(index));
             checkList.set(index, 0);
             switchList.get(index).setChecked(false);
         }
@@ -99,12 +100,16 @@ public class Alarm extends Activity {
                         else
                             dateStr = YMD[0] + "/" + YMD[1] + "/" + YMD[2];
                         if (!isTimeExist(dateStr, timeStr)) {
-                            helper.insertInfo(write_db, timeStr, 1, dateStr, null, null);
+                            helper.insertInfo(write_db, timeStr, 1, dateStr, null, null, "預設", null);
                             updateIDList();
                             alarmTimeList.add(timeStr);
                             alarmDateList.add(dateStr);
                             checkList.add(1);
+                            titleList.add(null);
+                            songList.add("預設");
+                            songPathList.add(null);
                             setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hourOfDay, minute, alarmIDList.get(alarmIDList.size() - 1));
+                            Toast.makeText(Alarm.this, "鬧鐘已設定 時間為" + timeStr, Toast.LENGTH_SHORT).show();
                             view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
                             viewList.add(view_alarm_display);
                             tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
@@ -138,7 +143,7 @@ public class Alarm extends Activity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if (compoundButton.isChecked()) {
-                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, alarmDateList.get(index), null, null);
+                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, alarmDateList.get(index), null, null, songList.get(index), songPathList.get(index));
                     int hour = Integer.parseInt(alarmTimeList.get(index).split(":")[0]);
                     int min = Integer.parseInt(alarmTimeList.get(index).split(":")[1]);
 
@@ -153,11 +158,12 @@ public class Alarm extends Activity {
                     else
                         dateStr = YMD[0] + "/" + YMD[1] + "/" + YMD[2];
                     alarmDateList.set(index, dateStr);
-                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, dateStr, null, null);
+                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, dateStr, null, null, songList.get(index), songPathList.get(index));
                     setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hour, min, alarmIDList.get(index));
+                    Toast.makeText(Alarm.this, "鬧鐘已設定 時間為" + alarmTimeList.get(index), Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), null, null);
+                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), null, null, songList.get(index), songPathList.get(index));
                     cancelAlarm(Alarm.this, alarmIDList.get(index));
                     Log.d("Switch", "close");
                 }
@@ -199,6 +205,9 @@ public class Alarm extends Activity {
         switchList.clear();
         tvList.clear();
         checkList.clear();
+        titleList.clear();
+        songList.clear();
+        songPathList.clear();
         if (cursor != null) {
             cursor.moveToFirst();
             //Log.d("getCount() ", cursor.getCount() + "");
@@ -207,22 +216,34 @@ public class Alarm extends Activity {
                 final String time = cursor.getString(1);
                 int check = cursor.getInt(2);
                 String date = cursor.getString(3);
+                String title = cursor.getString(4);
+                String song = cursor.getString(6);
+                String songPath = cursor.getString(7);
                 Log.d("ID ", id + "");
                 Log.d("TIME ", time);
                 Log.d("CHECK ", check + "");
                 Log.d("DATE ", date + "");
+                Log.d("TITLE ", title + "");
+                Log.d("SONG ", song + "");
+                Log.d("SONGPATH ", songPath + "");
                 view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
                 viewList.add(view_alarm_display);
                 alarmTimeList.add(time);
                 alarmDateList.add(date);
                 alarmIDList.add(id);
                 checkList.add(check);
+                titleList.add(title);
+                songList.add(song);
+                songPathList.add(songPath);
                 tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
                 tvList.add(tvAlarmTime);
                 swAlarm = (Switch) view_alarm_display.findViewById(R.id.swAlarm);
                 switchList.add(swAlarm);
                 LLV_display = (LinearLayout) view_alarm_display.findViewById(R.id.LLV_display);
-                tvAlarmTime.setText(time);
+                if (title != null)
+                    tvAlarmTime.setText(time + " " + title);
+                else
+                    tvAlarmTime.setText(time);
                 LLV.addView(view_alarm_display);
 
                 if (check == 1) {
@@ -327,6 +348,9 @@ public class Alarm extends Activity {
                     alarmTimeList.remove(idx);
                     alarmDateList.remove(idx);
                     alarmIDList.remove(idx);
+                    songList.remove(idx);
+                    songPathList.remove(idx);
+                    titleList.remove(idx);
                     for (int i = idx; i < alarmIDList.size(); i++) {
                         setListener(db, switchList.get(i), tvList.get(i), idx);
                     }
@@ -364,12 +388,6 @@ public class Alarm extends Activity {
                 //, alarmIntent);
         AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(), alarmIntent);
         alarmManager.setAlarmClock(alarmClockInfo, alarmIntent);
-        String timeStr = hour + ":" + min;
-        if (min < 10)
-            timeStr = hour + ":0" + min;
-        if (hour < 10)
-            timeStr = "0" + timeStr;
-        Toast.makeText(context, "鬧鐘已設定 時間為" + timeStr, Toast.LENGTH_SHORT).show();
     }
 
     public static void cancelAlarm(Context context, int RC) {

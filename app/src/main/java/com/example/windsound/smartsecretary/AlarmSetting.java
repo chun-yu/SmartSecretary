@@ -24,7 +24,7 @@ public class AlarmSetting extends Activity {
     TextView tvAlarmDate, _tvAlarmTime, tvAlarmSound;
     Button btnBack, btnDetermine;
     private DBHelper helper = null;
-    String time = "", date = "";
+    String oriTime = "", oriDate = "", time = "", date = "", song = "", songPath = "";
     int year = 0, month = 0, day = 0, hour = 0, min = 0;
 
     @Override
@@ -35,21 +35,32 @@ public class AlarmSetting extends Activity {
         initView();
         Bundle bundle = this.getIntent().getExtras();
         final int index = bundle.getInt("index");
+        Log.e("INDEX", index + "");
+        Log.e("TEST", bundle.getString("test") + "");
+
+        if (bundle.getString("song") != null)
+            song = bundle.getString("song");
+        else
+            song = Alarm.songList.get(index);
+        if (bundle.getString("songPath") != null)
+            songPath = bundle.getString("songPath");
+        else
+            songPath = Alarm.songPathList.get(index);
 
         helper = new DBHelper(this);
         final SQLiteDatabase write_db = helper.getWritableDatabase();
 
-        date = Alarm.alarmDateList.get(index);
-        time = Alarm.alarmTimeList.get(index);
+        date = oriDate = Alarm.alarmDateList.get(index);
+        time = oriTime = Alarm.alarmTimeList.get(index);
 
-        year = Integer.parseInt(date.split("/")[0]);
-        month = Integer.parseInt(date.split("/")[1]);
+        year = Integer.parseInt(oriDate.split("/")[0]);
+        month = Integer.parseInt(oriDate.split("/")[1]);
         month--;
-        day = Integer.parseInt(date.split("/")[2]);
-        hour = Integer.parseInt(time.split(":")[0]);
-        min = Integer.parseInt(time.split(":")[1]);
+        day = Integer.parseInt(oriDate.split("/")[2]);
+        hour = Integer.parseInt(oriTime.split(":")[0]);
+        min = Integer.parseInt(oriTime.split(":")[1]);
 
-        tvAlarmDate.setText(date);
+        tvAlarmDate.setText(oriDate);
         tvAlarmDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,7 +84,7 @@ public class AlarmSetting extends Activity {
             }
         });
 
-        _tvAlarmTime.setText(time);
+        _tvAlarmTime.setText(oriTime);
         _tvAlarmTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,6 +105,18 @@ public class AlarmSetting extends Activity {
             }
         });
 
+        tvAlarmSound.setText(song);
+        tvAlarmSound.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(AlarmSetting.this, MusicList.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt("index", index);
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
+
         btnBack.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -103,11 +126,11 @@ public class AlarmSetting extends Activity {
         btnDetermine.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
-                if (!Alarm.isTimeExist(date, time)) {
-                    helper.updateTimeInfo(write_db, Alarm.alarmIDList.get(index), time, 1, date, null, null);
-                    Toast.makeText(AlarmSetting.this, "時間已修改為 " + time, Toast.LENGTH_SHORT).show();
+                if ((time == oriTime && date == oriDate) || !Alarm.isTimeExist(date, time)) {
+                    helper.updateTimeInfo(write_db, Alarm.alarmIDList.get(index), time, 1, date, null, null, song, songPath);
                     Alarm.cancelAlarm(AlarmSetting.this, Alarm.alarmIDList.get(index));
                     Alarm.setAlarm(AlarmSetting.this, year, month+1, day, hour, min, Alarm.alarmIDList.get(index));
+                    Toast.makeText(AlarmSetting.this, "時間已修改為 " + time, Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(AlarmSetting.this, Alarm.class);
                     startActivity(intent);
                 }

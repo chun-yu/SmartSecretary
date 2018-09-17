@@ -358,7 +358,7 @@ public class memo extends Activity {
                     Toast toast = Toast.makeText(memo.this, s1 + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
-                    helper.updateTimeInfo(write_db, id, time, 1, date, s1, s2);
+                    helper.updateTimeInfo(write_db, id, time, 1, date, s1, s2, "預設", null);
                     popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
                     popupWindow.dismiss();
                     InputMethodManager inputMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -368,7 +368,7 @@ public class memo extends Activity {
                     Toast toast = Toast.makeText(memo.this, s1 + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
-                    helper.updateTimeInfo(write_db, id, time, 0, date, s1, s2);
+                    helper.updateTimeInfo(write_db, id, time, 0, date, s1, s2, "預設", null);
                     popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
                     popupWindow.dismiss();
                     InputMethodManager inputMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);

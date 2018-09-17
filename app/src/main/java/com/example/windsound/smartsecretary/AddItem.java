@@ -437,6 +437,7 @@ public class AddItem extends Activity {
         }else if(s1.equals("") && s2.equals("")){
             Toast.makeText(AddItem.this,getString(R.string.please_title)+"\n"+getString(R.string.content), Toast.LENGTH_LONG).show();
         }else{
+<<<<<<< Updated upstream
             if(s1.length()>10 || s2.length()>150){
                 Toast toast = Toast.makeText(AddItem.this,getString(R.string.input_outline), Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 0);toast.show();
@@ -472,6 +473,20 @@ public class AddItem extends Activity {
                         finish();
                     }
                 }
+=======
+            if(alarm_switch.isChecked()){
+                Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +"\n"+getString(R.string.open_Alaem), Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER,0,0);
+                toast.show();
+                helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1,date_view.getText().toString(),title_text.getText().toString(), content_text.getText().toString(), "預設", null);
+                finish();
+            }else{
+                Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +"\n"+getString(R.string.close_Alaem), Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER,0,0);
+                toast.show();
+                helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0,date_view.getText().toString(),title_text.getText().toString(), content_text.getText().toString(), "預設", null);
+                finish();
+>>>>>>> Stashed changes
             }
         }
     }

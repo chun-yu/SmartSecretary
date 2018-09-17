@@ -16,6 +16,8 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String DATE = "date";
     private static final String TITLE = "title";
     private static final String NOTE = "note";
+    private static final String SONG = "song_name";
+    private static final String SONGPATH = "song_path";
     private static final int DB_VERSION = 1;
 
     public DBHelper(Context context) {
@@ -34,7 +36,9 @@ public class DBHelper extends SQLiteOpenHelper {
                     CHECK + " TINYINT(1),"+
                     DATE + " TEXT(10)," +
                     TITLE + " TEXT(10), " +
-                    NOTE + " TEXT(150))");
+                    NOTE + " TEXT(150), " +
+                    SONG + " TEXT(50), " +
+                    SONGPATH + " TEXT(100))");
     }
 
     @Override
@@ -44,17 +48,19 @@ public class DBHelper extends SQLiteOpenHelper {
         //onCreate(db);
     }
 
-    public void insertInfo(SQLiteDatabase db, String time,int check, String date, String title, String note) {
+    public void insertInfo(SQLiteDatabase db, String time,int check, String date, String title, String note, String song, String songPath) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(TIME, time);
         contentValues.put(CHECK, check);
         contentValues.put(DATE, date);
         contentValues.put(TITLE, title);
         contentValues.put(NOTE, note);
+        contentValues.put(SONG, song);
+        contentValues.put(SONGPATH, songPath);
         db.insert(TABLE_NAME, null, contentValues);
     }
 
-    public void updateTimeInfo(SQLiteDatabase db, int rowId, String time, int check, String date ,String title, String note) {
+    public void updateTimeInfo(SQLiteDatabase db, int rowId, String time, int check, String date ,String title, String note, String song, String songPath) {
         String id = rowId + "";
         ContentValues contentValues = new ContentValues();
         contentValues.put(TIME, time);
@@ -62,6 +68,8 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(DATE, date);
         contentValues.put(TITLE, title);
         contentValues.put(NOTE, note);
+        contentValues.put(SONG, song);
+        contentValues.put(SONGPATH, songPath);
         db.update(TABLE_NAME, contentValues, _ID + "=?", new String[] {id});
         //db.execSQL("Update " + TABLE_NAME + " set " + TIME + "=" + time + " Where " + COUNTER + "=" + id);
     }
@@ -83,7 +91,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getInfo(SQLiteDatabase db) {
-        return  db.query(TABLE_NAME, new String[] {_ID, TIME, CHECK, DATE , TITLE, NOTE}, null, null, null, null, null);
+        return  db.query(TABLE_NAME, new String[] {_ID, TIME, CHECK, DATE , TITLE, NOTE, SONG, SONGPATH}, null, null, null, null, null);
     }
     public Cursor getInfoData() {
         SQLiteDatabase db = this.getWritableDatabase();
