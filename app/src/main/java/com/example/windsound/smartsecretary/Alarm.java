@@ -45,7 +45,8 @@ public class Alarm extends Activity {
     ArrayList<View> viewList = new ArrayList<View>();
     ArrayList<TextView> tvList = new ArrayList<TextView>();
     public static ArrayList<Switch> switchList = new ArrayList<Switch>();
-    ArrayList<String> titleList = new ArrayList<String>();
+    public static ArrayList<String> titleList = new ArrayList<String>();
+    public static ArrayList<String> noteList = new ArrayList<String>();
     public static ArrayList<String> songList = new ArrayList<String>();
     public static ArrayList<String> songPathList = new ArrayList<String>();
     String today_date = AddItem.getToday();
@@ -69,7 +70,7 @@ public class Alarm extends Activity {
         Bundle b = this.getIntent().getExtras();
         if (b != null) {
             int index = b.getInt("index");
-            helper.updateTimeInfo(write_db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), null, null, songList.get(index), songPathList.get(index));
+            helper.updateTimeInfo(write_db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), titleList.get(index), noteList.get(index), songList.get(index), songPathList.get(index));
             checkList.set(index, 0);
             switchList.get(index).setChecked(false);
         }
@@ -106,6 +107,7 @@ public class Alarm extends Activity {
                             alarmDateList.add(dateStr);
                             checkList.add(1);
                             titleList.add(null);
+                            noteList.add(null);
                             songList.add("預設");
                             songPathList.add(null);
                             setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hourOfDay, minute, alarmIDList.get(alarmIDList.size() - 1));
@@ -143,7 +145,6 @@ public class Alarm extends Activity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if (compoundButton.isChecked()) {
-                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, alarmDateList.get(index), null, null, songList.get(index), songPathList.get(index));
                     int hour = Integer.parseInt(alarmTimeList.get(index).split(":")[0]);
                     int min = Integer.parseInt(alarmTimeList.get(index).split(":")[1]);
 
@@ -158,12 +159,12 @@ public class Alarm extends Activity {
                     else
                         dateStr = YMD[0] + "/" + YMD[1] + "/" + YMD[2];
                     alarmDateList.set(index, dateStr);
-                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, dateStr, null, null, songList.get(index), songPathList.get(index));
+                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, dateStr, titleList.get(index), noteList.get(index), songList.get(index), songPathList.get(index));
                     setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hour, min, alarmIDList.get(index));
                     Toast.makeText(Alarm.this, "鬧鐘已設定 時間為" + alarmTimeList.get(index), Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), null, null, songList.get(index), songPathList.get(index));
+                    helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), titleList.get(index), noteList.get(index), songList.get(index), songPathList.get(index));
                     cancelAlarm(Alarm.this, alarmIDList.get(index));
                     Log.d("Switch", "close");
                 }
@@ -206,6 +207,7 @@ public class Alarm extends Activity {
         tvList.clear();
         checkList.clear();
         titleList.clear();
+        noteList.clear();
         songList.clear();
         songPathList.clear();
         if (cursor != null) {
@@ -217,6 +219,7 @@ public class Alarm extends Activity {
                 int check = cursor.getInt(2);
                 String date = cursor.getString(3);
                 String title = cursor.getString(4);
+                String note = cursor.getString(5);
                 String song = cursor.getString(6);
                 String songPath = cursor.getString(7);
                 Log.d("ID ", id + "");
@@ -233,6 +236,7 @@ public class Alarm extends Activity {
                 alarmIDList.add(id);
                 checkList.add(check);
                 titleList.add(title);
+                noteList.add(note);
                 songList.add(song);
                 songPathList.add(songPath);
                 tvAlarmTime = (TextView) view_alarm_display.findViewById(R.id.tvAlarmTime);
@@ -348,9 +352,10 @@ public class Alarm extends Activity {
                     alarmTimeList.remove(idx);
                     alarmDateList.remove(idx);
                     alarmIDList.remove(idx);
+                    titleList.remove(idx);
+                    noteList.remove(idx);
                     songList.remove(idx);
                     songPathList.remove(idx);
-                    titleList.remove(idx);
                     for (int i = idx; i < alarmIDList.size(); i++) {
                         setListener(db, switchList.get(i), tvList.get(i), idx);
                     }

@@ -423,70 +423,72 @@ public class AddItem extends Activity {
         super.onResume();
     }
 
-    private void check_if_null(){
+    private void check_if_null() {
         final SQLiteDatabase write_db = helper.getWritableDatabase();
         String s1 = title_text.getText().toString();
         String s2 = content_text.getText().toString();
-        String[] splitarrary = new String[3];String[] splitarrary2 = new String[2];
+        String[] splitarrary = new String[3];
+        String[] splitarrary2 = new String[2];
         splitarrary = date_view.getText().toString().split("/");
         splitarrary2 = btn_clock_view.getText().toString().split(":");
-        if(s1.equals("") && !s2.equals("")){
-            Toast.makeText(AddItem.this,getString(R.string.please_title), Toast.LENGTH_LONG).show();
-        }else if(!s1.equals("") && s2.equals("")){
-            Toast.makeText(AddItem.this,getString(R.string.content), Toast.LENGTH_LONG).show();
-        }else if(s1.equals("") && s2.equals("")){
-            Toast.makeText(AddItem.this,getString(R.string.please_title)+"\n"+getString(R.string.content), Toast.LENGTH_LONG).show();
-        }else{
-<<<<<<< Updated upstream
-            if(s1.length()>10 || s2.length()>150){
-                Toast toast = Toast.makeText(AddItem.this,getString(R.string.input_outline), Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 0);toast.show();
-            }else {
-                if(find_if_have()){
+        if (s1.equals("") && !s2.equals("")) {
+            Toast.makeText(AddItem.this, getString(R.string.please_title), Toast.LENGTH_LONG).show();
+        } else if (!s1.equals("") && s2.equals("")) {
+            Toast.makeText(AddItem.this, getString(R.string.content), Toast.LENGTH_LONG).show();
+        } else if (s1.equals("") && s2.equals("")) {
+            Toast.makeText(AddItem.this, getString(R.string.please_title) + "\n" + getString(R.string.content), Toast.LENGTH_LONG).show();
+        } else {
+            if (s1.length() > 10 || s2.length() > 150) {
+                Toast toast = Toast.makeText(AddItem.this, getString(R.string.input_outline), Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+            } else {
+                if (find_if_have()) {
                     if (alarm_switch.isChecked()) {
                         Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
-                        helper.updateTimeInfo(write_db, putin_null_dbID, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
-                        Alarm.setAlarm(AddItem.this,Integer.parseInt(splitarrary[0]),Integer.parseInt(splitarrary[1]),Integer.parseInt(splitarrary[2]),Integer.parseInt(splitarrary2[0]),Integer.parseInt(splitarrary2[1]),putin_null_dbID);
+                        helper.updateTimeInfo(write_db, putin_null_dbID, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString(), "預設", null);
+                        Alarm.setAlarm(AddItem.this, Integer.parseInt(splitarrary[0]), Integer.parseInt(splitarrary[1]), Integer.parseInt(splitarrary[2]), Integer.parseInt(splitarrary2[0]), Integer.parseInt(splitarrary2[1]), putin_null_dbID);
                         finish();
                     } else {
                         Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
-                        helper.updateTimeInfo(write_db, putin_null_dbID, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
+                        helper.updateTimeInfo(write_db, putin_null_dbID, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString(), "預設", null);
                         finish();
                     }
-                }else{
+                } else {
                     if (alarm_switch.isChecked()) {
                         Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
-                        helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
-                        Alarm.setAlarm(AddItem.this,Integer.parseInt(splitarrary[0]),Integer.parseInt(splitarrary[1]),Integer.parseInt(splitarrary[2]),Integer.parseInt(splitarrary2[0]),Integer.parseInt(splitarrary2[1]),helper.getDBcount());
+                        helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString(), "預設", null);
+                        Alarm.setAlarm(AddItem.this, Integer.parseInt(splitarrary[0]), Integer.parseInt(splitarrary[1]), Integer.parseInt(splitarrary[2]), Integer.parseInt(splitarrary2[0]), Integer.parseInt(splitarrary2[1]), helper.getDBcount());
                         finish();
                     } else {
                         Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
-                        helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString());
+                        helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString(), "預設", null);
                         finish();
                     }
                 }
-=======
-            if(alarm_switch.isChecked()){
-                Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +"\n"+getString(R.string.open_Alaem), Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER,0,0);
-                toast.show();
-                helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1,date_view.getText().toString(),title_text.getText().toString(), content_text.getText().toString(), "預設", null);
-                finish();
-            }else{
-                Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString()+"  : "+ getString(R.string.new_success) +"\n"+getString(R.string.close_Alaem), Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER,0,0);
-                toast.show();
-                helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0,date_view.getText().toString(),title_text.getText().toString(), content_text.getText().toString(), "預設", null);
-                finish();
->>>>>>> Stashed changes
+                /*
+                if (alarm_switch.isChecked()) {
+                    Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString(), "預設", null);
+                    finish();
+                } else {
+                    Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString(), "預設", null);
+                    finish();
+                }
+                */
             }
         }
     }

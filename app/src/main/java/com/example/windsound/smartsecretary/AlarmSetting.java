@@ -127,7 +127,7 @@ public class AlarmSetting extends Activity {
             @Override
             public void onClick(View v) {
                 if ((time == oriTime && date == oriDate) || !Alarm.isTimeExist(date, time)) {
-                    helper.updateTimeInfo(write_db, Alarm.alarmIDList.get(index), time, 1, date, null, null, song, songPath);
+                    helper.updateTimeInfo(write_db, Alarm.alarmIDList.get(index), time, 1, date, Alarm.titleList.get(index), Alarm.noteList.get(index), song, songPath);
                     Alarm.cancelAlarm(AlarmSetting.this, Alarm.alarmIDList.get(index));
                     Alarm.setAlarm(AlarmSetting.this, year, month+1, day, hour, min, Alarm.alarmIDList.get(index));
                     Toast.makeText(AlarmSetting.this, "時間已修改為 " + time, Toast.LENGTH_SHORT).show();

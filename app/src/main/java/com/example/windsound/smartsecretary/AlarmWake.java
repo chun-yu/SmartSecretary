@@ -27,11 +27,8 @@ public class AlarmWake extends Activity {
     int maxVolume = 100;
     String title = null, note = null, songPath = null;
     Cursor cursor;
-<<<<<<< Updated upstream
     PowerManager.WakeLock wl;
-=======
     PowerManager.WakeLock wakeLock;
->>>>>>> Stashed changes
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,10 +53,8 @@ public class AlarmWake extends Activity {
         final int index = findWhichAlarm(nowYear,nowMonth+1, nowDay, nowHour, nowMin);
         Log.d("index", index + "");
 
-<<<<<<< Updated upstream
         mp = new MediaPlayer();
         mp = MediaPlayer.create(this, songWakeUp);
-=======
         if (title == null)
             tvWake.setText("起床囉~~~~~");
         else
@@ -79,7 +74,6 @@ public class AlarmWake extends Activity {
         else
             mp = MediaPlayer.create(this, songWakeUp);
         //mp.setAudioStreamType(AudioManager.STREAM_ALARM);
->>>>>>> Stashed changes
         mp.setVolume(maxVolume, maxVolume);
         mp.setLooping(true);
         mp.start();
@@ -142,6 +136,12 @@ public class AlarmWake extends Activity {
 
     protected void onPause() {
         super.onPause();
+        //mp.pause();
+        if (mp != null)
+        {
+            mp.release();
+            mp = null;
+        }
     }
 
     @Override
