@@ -28,7 +28,7 @@ public class AlarmWake extends Activity {
     String title = null, note = null, songPath = null;
     Cursor cursor;
     PowerManager.WakeLock wl;
-    PowerManager.WakeLock wakeLock;
+    //PowerManager.WakeLock wakeLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +53,8 @@ public class AlarmWake extends Activity {
         final int index = findWhichAlarm(nowYear,nowMonth+1, nowDay, nowHour, nowMin);
         Log.d("index", index + "");
 
-        mp = new MediaPlayer();
-        mp = MediaPlayer.create(this, songWakeUp);
+        //mp = new MediaPlayer();
+        //mp = MediaPlayer.create(this, songWakeUp);
         if (title == null)
             tvWake.setText("起床囉~~~~~");
         else
@@ -79,19 +79,13 @@ public class AlarmWake extends Activity {
         mp.start();
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK
-                | PowerManager.ACQUIRE_CAUSES_WAKEUP
-                | PowerManager.ON_AFTER_RELEASE, "");
-        if (!wakeLock.isHeld()) {
-            wakeLock.acquire();
-        }
-        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        wl = pm.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.SCREEN_DIM_WAKE_LOCK, "bright");
 
-        KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        KeyguardManager.KeyguardLock mKeyguardLock = km.newKeyguardLock("");
-        if (km.inKeyguardRestrictedInputMode()) {
-            mKeyguardLock.disableKeyguard();
-        }
+        wl.acquire();
+
+        KeyguardManager km= (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        KeyguardManager.KeyguardLock kl = km.newKeyguardLock("unLock");
+        kl.disableKeyguard();
 
         btnCloseAlarm.setOnClickListener(new Button.OnClickListener()
         {
@@ -134,16 +128,6 @@ public class AlarmWake extends Activity {
         return -1;
     }
 
-    protected void onPause() {
-        super.onPause();
-        //mp.pause();
-        if (mp != null)
-        {
-            mp.release();
-            mp = null;
-        }
-    }
-
     @Override
     protected void onDestroy()
     {
@@ -153,6 +137,6 @@ public class AlarmWake extends Activity {
             mp.release();
             mp = null;
         }
-        wakeLock.release();
+        wl.release();
     }
 }

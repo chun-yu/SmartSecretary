@@ -193,7 +193,7 @@ public class memo extends Activity {
         LinearLayout.LayoutParams  params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,240);
         params.setMargins(30,20,30,15);
         tr.setLayoutParams(params);
-        params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 65);
+        params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 68);
         params.setMargins(25,20,25,15);
         LinearLayout ttr1 = new LinearLayout(this);
         ttr1.setLayoutParams(params);
@@ -224,16 +224,17 @@ public class memo extends Activity {
                 LinearLayout.LayoutParams.FILL_PARENT,
                 LinearLayout.LayoutParams.FILL_PARENT, 11));
         TextView tv3 = new TextView(this);
-        tv3.setTextSize(25);
+        tv3.setTextSize(20);
         tv3.setText(title);
         tv3.setTextColor(getResources().getColor(R.color.colorPrimaryLight));
         tv3.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.FILL_PARENT,
                 LinearLayout.LayoutParams.FILL_PARENT, 3));
         TextView tv4 = new TextView(this);
-        tv4.setTextSize(20);
+        tv4.setTextSize(16);
         if(check==0)tv4.setText("提醒  未開啟");
         else    tv4.setText("提醒  已開啟");
+        tv4.setGravity(Gravity.RIGHT);
         tv4.setTextColor(getResources().getColor(R.color.colorAccent));
         tv4.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.FILL_PARENT,
