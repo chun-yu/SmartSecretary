@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -34,7 +35,8 @@ import java.util.Calendar;
 public class memo extends Activity {
 
     private DBHelper helper = null;
-    private Button back_btn2,addmemo_fbtn;
+    private Button back_btn2;
+    private FloatingActionButton addmemo_fbtn;
     private ImageButton search_btn;
     private LinearLayout memo_show;
     private Cursor res;
@@ -54,6 +56,12 @@ public class memo extends Activity {
         });
         memo_show = (LinearLayout) findViewById(R.id.memo_show);
         show_memo_to_click();
+        addmemo_fbtn = (FloatingActionButton) findViewById(R.id.addmemo_fbtn);
+        addmemo_fbtn.setOnClickListener( new View.OnClickListener(){
+            public void onClick (View v){
+                show_new_memo(v);
+            }
+        });
     }
 
     private void show_memo_to_click() {
@@ -92,6 +100,11 @@ public class memo extends Activity {
             }
         }
         putin_array_add_show(datearrary,big,small);
+    }
+    private void show_new_memo(View v) {
+        String date = AddItem.getToday();
+        String time = AddItem.getNewTime();
+        PopArticle(v,-1,time,0,date,null,null);
     }
 
     private void putin_array_add_show(int[] datearrary,int big,int small){
@@ -358,7 +371,11 @@ public class memo extends Activity {
                     Toast toast = Toast.makeText(memo.this, s1 + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
-                    helper.updateTimeInfo(write_db, id, time, 1, date, s1, s2, "預設", null);
+                    if (id<0){
+                        helper.insertInfo(write_db,time,0,date,s1,s2,"預設",null);
+                    }else{
+                        helper.updateTimeInfo(write_db, id, time, 1, date, s1, s2, "預設", null);
+                    }
                     popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
                     popupWindow.dismiss();
                     InputMethodManager inputMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -368,7 +385,11 @@ public class memo extends Activity {
                     Toast toast = Toast.makeText(memo.this, s1 + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
-                    helper.updateTimeInfo(write_db, id, time, 0, date, s1, s2, "預設", null);
+                    if (id<0){
+                        helper.insertInfo(write_db,time,0,date,s1,s2,"預設",null);
+                    }else{
+                        helper.updateTimeInfo(write_db, id, time, 0, date, s1, s2, "預設", null);
+                    }
                     popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
                     popupWindow.dismiss();
                     InputMethodManager inputMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
