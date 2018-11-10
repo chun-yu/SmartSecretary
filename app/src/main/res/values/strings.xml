@@ -2,9 +2,9 @@
     <string name="app_name">SmartSecretary</string>
     <string name="create_alarm">新 增 鬧 鐘</string>
     <string name="title_name">智 慧 秘 書</string>
-    <string name="new_note">新 增 記 事</string>
+    <string name="new_note">新 增\n提 醒</string>
     <string name="_new">新 增</string>
-    <string name="my_alarm">我 的 鬧 鐘</string>
+    <string name="my_alarm">鬧 鐘</string>
     <string name="my_note">記 事 本</string>
     <string name="alarm_setting">鬧 鐘 設 定</string>
     <string name="music_setting">鈴 聲 設 定</string>

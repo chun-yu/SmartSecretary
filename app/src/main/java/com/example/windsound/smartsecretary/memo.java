@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 
 public class memo extends Activity {
 
@@ -91,12 +92,10 @@ public class memo extends Activity {
         int big = datearrary.length;
         int small = 0;
         for (int i = datearrary.length; i > 0;i--){
-            if(datearrary[i-1]==count){
+            if(datearrary[i-1]>=count){
                 big = big -1;
-            }else if(datearrary[i-1]<count){
-                small=i-1;break;
-            }else{
-                big = big -1;
+            }else {
+                small = i-1; break;
             }
         }
         putin_array_add_show(datearrary,big,small);
@@ -109,22 +108,62 @@ public class memo extends Activity {
 
     private void putin_array_add_show(int[] datearrary,int big,int small){
         boolean putid = false;
+        ArrayList<Integer> small_datearray = new ArrayList<Integer>();
+        ArrayList<Integer> big_datearray = new ArrayList<Integer>();
         ArrayList<Integer> big_idarrary = new ArrayList<Integer>();
         ArrayList<Integer> small_idarrary = new ArrayList<Integer>();
-        String[] splitarrary = new String[3];
+        String[] splitarrary = new String[3];   String[] splitarrary2 = new String[2];
+        //排今天
         for (int i = big; i < datearrary.length; i++) {
             int k = datearrary[i];
             res = helper.getInfoData();
             while (res.moveToNext()) {
-                String s2 = res.getString(3);
+                String s2 = res.getString(3);String s3 = res.getString(1);
                 splitarrary = s2.split("/");
-                int year = Integer.parseInt(splitarrary[0]);
-                int month = Integer.parseInt(splitarrary[1]);
-                int day = Integer.parseInt(splitarrary[2]);
-                int date = year * 10000 + month * 100 + day;
+                splitarrary2 = s3.split(":");
+                int date = Integer.parseInt(splitarrary[0]) * 10000 +Integer.parseInt(splitarrary[1]) * 100 + Integer.parseInt(splitarrary[2]);
+                int date_time= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                        +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
                 String text1 = res.getString(4);
                 String text2 = res.getString(5);
                 if (date == k) {
+                    putid = true;
+                    for (int j = 0; j < big_datearray.size(); j++) {
+                        if (big_datearray.get(j) == res.getInt(0)) {
+                            putid = false;
+                        }
+                    }
+                    if (putid) {
+                        if(text1 != null && text2 != null){
+                            big_datearray.add(date_time);
+                        }
+                    }
+                }
+            }
+        }
+        Collections.sort(big_datearray);
+        String  today = AddItem.getToday();     splitarrary = today.split("/");
+        String  today_time = AddItem.getNewTime();   splitarrary2 = today_time.split(":");
+        int now = Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+        int big_date = big_datearray.size();    int small_date = 0;
+        for (int i = big_datearray.size(); i > 0;i--){  //擷取當下時間點的 分界
+            if(big_datearray.get(i-1) >= now){
+                big_date = big_date -1;
+            }else {
+                small_date = i-1; break;
+            }
+        }
+        for (int i = big_date ; i < big_datearray.size() ; i++){   //放入今天時間 尚未到期的
+            int k = big_datearray.get(i);
+            res = helper.getInfoData();
+            while (res.moveToNext()) {
+                String s2 = res.getString(3);String s3 = res.getString(1);
+                splitarrary = s2.split("/");
+                splitarrary2 = s3.split(":");
+                int date_time= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                        +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+                if (date_time == k) {
                     putid = true;
                     for (int j = 0; j < big_idarrary.size(); j++) {
                         if (big_idarrary.get(j) == res.getInt(0)) {
@@ -132,26 +171,72 @@ public class memo extends Activity {
                         }
                     }
                     if (putid) {
+                        big_idarrary.add(res.getInt(0));
+                    }
+                }
+            }
+        }
+        for (int i = small_date ; i >= 0 ; i--){   //放入今天時間 已經到期的 由最近時間往下排
+            int k = big_datearray.get(i);
+            res = helper.getInfoData();
+            while (res.moveToNext()) {
+                String s2 = res.getString(3);String s3 = res.getString(1);
+                splitarrary = s2.split("/");
+                splitarrary2 = s3.split(":");
+                int date_time= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                        +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+                if (date_time == k) {
+                    putid = true;
+                    for (int j = 0; j < big_idarrary.size(); j++) {
+                        if (big_idarrary.get(j) == res.getInt(0)) {
+                            putid = false;
+                        }
+                    }
+                    if (putid) {
+                        big_idarrary.add(res.getInt(0));
+                    }
+                }
+            }
+        }
+        //排昨天以前
+        for (int i = 0; i <= small; i++) {
+            int k = datearrary[i];
+            res = helper.getInfoData();
+            while (res.moveToNext()) {
+                String s2 = res.getString(3);String s3 = res.getString(1);
+                splitarrary = s2.split("/");
+                splitarrary2 = s3.split(":");
+                int date = Integer.parseInt(splitarrary[0]) * 10000 +Integer.parseInt(splitarrary[1]) * 100 + Integer.parseInt(splitarrary[2]);
+                int date_time= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                        +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+                String text1 = res.getString(4);
+                String text2 = res.getString(5);
+                if (date == k) {
+                    putid = true;
+                    for (int j = 0; j < small_datearray.size(); j++) {
+                        if (small_datearray.get(j) == res.getInt(0)) {
+                            putid = false;
+                        }
+                    }
+                    if (putid) {
                         if(text1 != null && text2 != null){
-                            big_idarrary.add(res.getInt(0));
+                            small_datearray.add(date_time);
                         }
                     }
                 }
             }
         }
-        for (int i = 0; i <= small; i++) {
-            int k = datearrary[i];
+        Collections.sort(small_datearray);
+        for (int i = small_datearray.size(); i > 0; i--) {
+            int k = small_datearray.get(i-1);
             res = helper.getInfoData();
             while (res.moveToNext()) {
-                String s2 = res.getString(3);
+                String s2 = res.getString(3);String s3 = res.getString(1);
                 splitarrary = s2.split("/");
-                int year = Integer.parseInt(splitarrary[0]);
-                int month = Integer.parseInt(splitarrary[1]);
-                int day = Integer.parseInt(splitarrary[2]);
-                int date = year * 10000 + month * 100 + day;
-                String text1 = res.getString(4);
-                String text2 = res.getString(5);
-                if (date == k) {
+                splitarrary2 = s3.split(":");
+                int date_time= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                        +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+                if (date_time == k) {
                     putid = true;
                     for (int j = 0; j < small_idarrary.size(); j++) {
                         if (small_idarrary.get(j) == res.getInt(0)) {
@@ -159,15 +244,27 @@ public class memo extends Activity {
                         }
                     }
                     if (putid) {
-                        if(text1 != null && text2 != null){
                             small_idarrary.add(res.getInt(0));
-                        }
                     }
                 }
             }
         }
         for (int i = 0; i < big_idarrary.size(); i++) {
             res = helper.getInfoData();
+            if(i==0){
+                LinearLayout before_text = new LinearLayout(this);
+                before_text.setBackgroundColor(getResources().getColor(R.color.holo_blue_dark));
+                LinearLayout.LayoutParams  params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,60);
+                params.setMargins(30,20,30,0);
+                before_text.setLayoutParams(params);
+                TextView tv = new TextView(this);
+                tv.setTextSize(16);
+                tv.setText("今日");
+                tv.setTextColor(getResources().getColor(R.color.gray));
+                tv.setPadding(25,0,0,0);
+                before_text.addView(tv);
+                memo_show.addView(before_text);
+            }
             while (res.moveToNext()) {
                 if (big_idarrary.get(i) == res.getInt(0)) {
                     add_table_show(res.getInt(0),getResources().getColor(R.color.little_holo_blue_dark),res.getString(3), res.getString(4), res.getString(1),res.getInt(2),res.getString(5));
@@ -176,6 +273,20 @@ public class memo extends Activity {
         }
         for (int i = 0; i < small_idarrary.size(); i++) {
             res = helper.getInfoData();
+            if(i==0){
+                LinearLayout before_text = new LinearLayout(this);
+                before_text.setBackgroundColor(getResources().getColor(R.color.dark_trans_red));
+                LinearLayout.LayoutParams  params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,60);
+                params.setMargins(30,20,30,0);
+                before_text.setLayoutParams(params);
+                TextView tv = new TextView(this);
+                tv.setTextSize(16);
+                tv.setText("昨日以前");
+                tv.setTextColor(getResources().getColor(R.color.gray));
+                tv.setPadding(25,0,0,0);
+                before_text.addView(tv);
+                memo_show.addView(before_text);
+            }
             while (res.moveToNext()) {
                 if (small_idarrary.get(i) == res.getInt(0)) {
                     add_table_show(res.getInt(0),getResources().getColor(R.color.trans_red),res.getString(3), res.getString(4), res.getString(1),res.getInt(2),res.getString(5));
@@ -247,6 +358,7 @@ public class memo extends Activity {
         tv4.setTextSize(16);
         if(check==0)tv4.setText("提醒  未開啟");
         else    tv4.setText("提醒  已開啟");
+        if(color==getResources().getColor(R.color.trans_red))   tv4.setText("已過期");
         tv4.setGravity(Gravity.RIGHT);
         tv4.setTextColor(getResources().getColor(R.color.colorAccent));
         tv4.setLayoutParams(new LinearLayout.LayoutParams(
