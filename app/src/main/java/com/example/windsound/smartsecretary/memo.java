@@ -146,12 +146,12 @@ public class memo extends Activity {
         String  today_time = AddItem.getNewTime();   splitarrary2 = today_time.split(":");
         int now = Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
                 +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
-        int big_date = big_datearray.size();    int small_date = 0;
+        int big_date = big_datearray.size();    int small_date = -1;
         for (int i = big_datearray.size(); i > 0;i--){  //擷取當下時間點的 分界
             if(big_datearray.get(i-1) >= now){
                 big_date = big_date -1;
             }else {
-                small_date = i-1; break;
+                small_date = big_date-1; break;
             }
         }
         for (int i = big_date ; i < big_datearray.size() ; i++){   //放入今天時間 尚未到期的
