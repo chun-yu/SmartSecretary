@@ -4,8 +4,8 @@
     android:id="@+id/LLV_display"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    style="@style/btn_alarm_linear"
     android:orientation="vertical">
-
 
     <LinearLayout
         android:id="@+id/LLH_display"

@@ -55,6 +55,7 @@ public class Alarm extends Activity {
     int YMD[] = new int[3];
     int nowYear, nowMonth, nowDate, nowHour, nowMin;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,6 +123,10 @@ public class Alarm extends Activity {
                             tvAlarmTime.setText(timeStr);
                             swAlarm.setChecked(true);
                             setListener(write_db, swAlarm, tvAlarmTime, alarmIDList.size()-1);
+                            final LinearLayout space = new LinearLayout(Alarm.this);
+                            LinearLayout.LayoutParams  params2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,20);
+                            space.setLayoutParams(params2);
+                            LLV.addView(space);
                             LLV.addView(view_alarm_display);
                         }
                         else {
@@ -248,6 +253,10 @@ public class Alarm extends Activity {
                     tvAlarmTime.setText(time + " " + title);
                 else
                     tvAlarmTime.setText(time);
+                final LinearLayout space = new LinearLayout(Alarm.this);
+                LinearLayout.LayoutParams  params2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,20);
+                space.setLayoutParams(params2);
+                LLV.addView(space);
                 LLV.addView(view_alarm_display);
 
                 if (check == 1) {

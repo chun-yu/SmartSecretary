@@ -48,4 +48,14 @@
         <item name="android:windowEnterAnimation">@anim/in_lefttoright</item>
         <item name="android:windowExitAnimation">@anim/out_righttoleft</item>
     </style>
+
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+    </style>
+    <style name="btn_alarm_linear" parent="@android:style/Widget.Button">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/alarm_linear</item>
+        <item name="android:padding">10dip</item>
+    </style>
 </resources>

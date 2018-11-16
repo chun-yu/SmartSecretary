@@ -322,13 +322,17 @@ public class AddItem extends Activity {
             Log.e(TAG,e.getMessage());
         }
     }
-    private void startOCR(Uri imageUri){//OCR
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = false;
-        options.inSampleSize = 6;
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath,options);
-        String result = this.getText(bitmap);
-        content_text.setText(result);                                               //這行不確定有沒有打對
+    private void startOCR(Uri imageUri){//OCR       **這裡有些問題**
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = 6;
+            Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath,options);
+            String result = this.getText(bitmap);
+            content_text.setText(result);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }//這行不確定有沒有打對
     }
 
     private String getText(Bitmap bitmap) {                                         //最後的部分
