@@ -1,9 +1,11 @@
 package com.example.windsound.smartsecretary;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -43,6 +46,8 @@ public class memo extends Activity {
     private Cursor res;
     PopupWindow popupWindow;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+    final Context context = this;
+    private EditText search_title;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,7 +68,45 @@ public class memo extends Activity {
                 show_new_memo(v);
             }
         });
+        search_title = (EditText)findViewById(R.id.search_title);
+        search_btn = (ImageButton) findViewById(R.id.search_btn);
+        search_btn.setOnClickListener( new View.OnClickListener(){
+            public void onClick (View v){
+                LayoutInflater li = LayoutInflater.from(context);
+                View promptsView = li.inflate(R.layout.search_title, null);
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                        context);
+
+                alertDialogBuilder.setView(promptsView);
+
+                final EditText userInput = (EditText) promptsView.findViewById(R.id.search_title);
+
+                alertDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("確定",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        dialog.cancel();
+                                    }
+                                })
+                        .setNegativeButton("取消",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                alertDialog.show();
+
+            }
+        });
     }
+
+
+
 
     private void show_memo_to_click() {
         res = helper.getInfoData();
@@ -73,6 +116,7 @@ public class memo extends Activity {
         for (int i = memo_show.getChildCount(); i >= 0; i--) {
             memo_show.removeView(memo_show.getChildAt(i));
         }
+
         while (res.moveToNext()) {
             String s2 = res.getString(3);
             splitarrary = s2.split("/");
