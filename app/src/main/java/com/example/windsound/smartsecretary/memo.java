@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -74,14 +75,9 @@ public class memo extends Activity {
             public void onClick (View v){
                 LayoutInflater li = LayoutInflater.from(context);
                 View promptsView = li.inflate(R.layout.search_title, null);
-
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                        context);
-
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setView(promptsView);
-
                 final EditText userInput = (EditText) promptsView.findViewById(R.id.search_title);
-
                 alertDialogBuilder
                         .setCancelable(false)
                         .setPositiveButton("確定",
@@ -96,17 +92,11 @@ public class memo extends Activity {
                                         dialog.cancel();
                                     }
                                 });
-
                 AlertDialog alertDialog = alertDialogBuilder.create();
-
                 alertDialog.show();
-
             }
         });
     }
-
-
-
 
     private void show_memo_to_click() {
         res = helper.getInfoData();
@@ -356,7 +346,20 @@ public class memo extends Activity {
                 PopArticle(view,article_id,time,check,date,title,note);
             }
         });
-
+        tr.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                try
+                {
+                    showAlertDialog(article_id,title,date,time);
+                }catch(Exception e)
+                {
+                    Log.d("Long click", "error");
+                    return false;
+                }
+                return false;
+            }
+        });
         tr.setBackgroundColor(color);
         LinearLayout.LayoutParams  params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,240);
         params.setMargins(30,20,30,15);
@@ -555,5 +558,26 @@ public class memo extends Activity {
                 }
             }
         }
+    }
+
+    void showAlertDialog(final int id,String title,String date,String time) {
+        new AlertDialog.Builder(memo.this)
+                .setTitle(getString(R.string.sure_delete) + "       " + title)
+                .setMessage("\n"+getString(R.string.time) +" : " + time +"\n\n"
+                        + getString(R.string.date) + " : " + date + "           " + getDay_of_week(date))
+                .setPositiveButton(getString(R.string.determine), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        helper.remove_Note(id);
+                        show_memo_to_click();
+                    }
+                })
+                .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .show();
     }
 }

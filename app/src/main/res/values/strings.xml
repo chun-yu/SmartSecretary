@@ -20,6 +20,7 @@
     <string name="title">標 題</string>
     <string name="content">內 容</string>
     <string name="determine">確 定</string>
+    <string name="cancel">取 消</string>
     <string name="noSet">未 命 名</string>
     <string name="unknow">未 知</string>
     <string name="remind">提 醒</string>
@@ -40,4 +41,5 @@
     <string name="friday">星期五</string>
     <string name="saturday">星期六</string>
     <string name="sunday">星期日</string>
+    <string name="sure_delete">確定要  刪除  </string>
 </resources>

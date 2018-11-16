@@ -78,8 +78,8 @@ public class DBHelper extends SQLiteOpenHelper {
         String id = rowId + "";
         db.delete(TABLE_NAME, _ID + "=" + id, null);
     }
-    public boolean remove_Note(int rowId) { //刪除指定的資料
-        return getWritableDatabase().delete(TABLE_NAME, _ID + "=" + rowId, null) > 0;
+    public void remove_Note(int rowId) { //刪除指定的資料
+        this.getWritableDatabase().delete(TABLE_NAME, _ID + "=" + rowId, null);
     }
     public int getDBcount() {
         int result = 0;

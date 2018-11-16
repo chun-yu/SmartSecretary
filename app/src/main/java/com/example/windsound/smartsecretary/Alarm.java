@@ -63,7 +63,7 @@ public class Alarm extends Activity {
 
         helper = new DBHelper(this);
         final SQLiteDatabase write_db = helper.getWritableDatabase();
-        //helper.close();
+        //        //helper.close();
 
         initView();
         showTime(write_db);
