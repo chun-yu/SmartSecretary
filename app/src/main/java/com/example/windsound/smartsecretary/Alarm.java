@@ -166,11 +166,13 @@ public class Alarm extends Activity {
                     alarmDateList.set(index, dateStr);
                     helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, dateStr, titleList.get(index), noteList.get(index), songList.get(index), songPathList.get(index));
                     setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hour, min, alarmIDList.get(index));
+                    viewList.get(index).setEnabled(true);
                     Toast.makeText(Alarm.this, "鬧鐘已設定 時間為" + alarmTimeList.get(index), Toast.LENGTH_SHORT).show();
                 }
                 else {
                     helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), titleList.get(index), noteList.get(index), songList.get(index), songPathList.get(index));
                     cancelAlarm(Alarm.this, alarmIDList.get(index));
+                    viewList.get(index).setEnabled(false);
                     Log.d("Switch", "close");
                 }
             }
@@ -183,7 +185,7 @@ public class Alarm extends Activity {
                 Bundle bundle = new Bundle();
                 bundle.putInt("index", index);
                 intent.putExtras(bundle);
-                startActivity(intent);
+                startActivityForResult(intent,100);
             }
         });
         tv.setOnLongClickListener(new View.OnLongClickListener() {
@@ -202,8 +204,11 @@ public class Alarm extends Activity {
         });
     }
 
-    private void showTime(final SQLiteDatabase write_db) {
+    public void showTime(final SQLiteDatabase write_db) {
         cursor = helper.getInfo(helper.getReadableDatabase());
+        for (int i = LLV.getChildCount(); i >= 0; i--) {
+            LLV.removeView(LLV.getChildAt(i));
+        }
         alarmTimeList.clear();
         alarmDateList.clear();
         alarmIDList.clear();
@@ -256,15 +261,15 @@ public class Alarm extends Activity {
                 final LinearLayout space = new LinearLayout(Alarm.this);
                 LinearLayout.LayoutParams  params2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,20);
                 space.setLayoutParams(params2);
-                LLV.addView(space);
-                LLV.addView(view_alarm_display);
-
                 if (check == 1) {
                     swAlarm.setChecked(true);
+                    view_alarm_display.setEnabled(true);
+                }else{
+                    view_alarm_display.setEnabled(false);
                 }
-
+                LLV.addView(space);
+                LLV.addView(view_alarm_display);
                 setListener(write_db, swAlarm, tvAlarmTime, i);
-
                 cursor.moveToNext();
             }
             //Log.d("getCount() ", cursor.getCount() + "");
@@ -411,5 +416,12 @@ public class Alarm extends Activity {
         alarmManager.cancel(alarmIntent);
         alarmIntent = null;
         //Toast.makeText(this, "取消鬧鐘", Toast.LENGTH_SHORT).show();
+    }
+
+    // 返回activity页面刷新
+    protected void onActivityResult(int request, int requestCode ,Intent data) {
+        final SQLiteDatabase write_db = helper.getWritableDatabase();
+        if (request == RESULT_OK && requestCode  == 100)
+            showTime(write_db);
     }
 }

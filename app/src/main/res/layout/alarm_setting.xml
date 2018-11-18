@@ -17,93 +17,197 @@
 
             <Button
                 android:id="@+id/btnBack"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="5"
-                android:background="@color/colorPrimary"
+                android:layout_weight="3"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:background="@color/colorPrimaryLight"
                 android:text="@string/back"
-                android:textColor="@android:color/background_light"
-                android:textSize="24sp" />
+                android:textSize="16dp"
+                android:textColor="@android:color/background_light" />
 
             <TextView
                 android:id="@+id/tvAlarmSetting"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="2.5"
+                android:layout_weight="8"
                 android:background="@color/colorPrimaryLight"
                 android:gravity="center"
                 android:text="@string/alarm_setting"
+                android:textStyle="bold"
                 android:textAlignment="center"
                 android:textColor="@android:color/background_light"
-                android:textSize="30sp" />
+                android:textSize="24sp" />
 
             <Button
                 android:id="@+id/btnDetermine"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="5"
-                android:background="@color/colorPrimary"
+                android:layout_weight="3"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:background="@color/colorPrimaryLight"
                 android:text="@string/determine"
-                android:textColor="@android:color/background_light"
-                android:textSize="24sp" />
+                android:textSize="16dp"
+                android:textColor="@android:color/background_light" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvDate"
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="5dp"
+            />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/holo_blue_dark"
-            android:text="@string/date"
-            android:textColor="@android:color/background_light"
-            android:textSize="30sp" />
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginRight="5dp"
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tvAlarmDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/date"
-            android:textSize="30sp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_marginRight="2dp"
+                android:layout_weight="1">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:background="#FF000000" />
+                <TextView
+                    android:id="@+id/tvDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="#cc33aaFF"
+                    android:text="@string/date"
+                    android:textColor="@android:color/background_light"
+                    android:gravity="center"
+                    android:textSize="24sp" />
 
-        <TextView
-            android:id="@+id/tvTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/time"
-            android:background="@color/holo_blue_dark"
-            android:textColor="@android:color/background_light"
-            android:textSize="30sp" />
+                <TextView
+                    android:id="@+id/tvAlarmDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:gravity="center"
+                    android:text="@string/date"
+                    android:textSize="24sp" />
 
-        <TextView
-            android:id="@+id/_tvAlarmTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/time"
-            android:textSize="30sp" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="@color/light_gray" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_marginLeft="2dp"
+                android:layout_weight="1">
+                <TextView
+                    android:id="@+id/tvTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/time"
+                    android:layout_margin="5dp"
+                    android:background="#cc33aaFF"
+                    android:textColor="@android:color/background_light"
+                    android:gravity="center"
+                    android:textSize="24sp" />
 
-        <View
+                <TextView
+                    android:id="@+id/_tvAlarmTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/time"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:gravity="center"
+                    android:textSize="24sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="@color/light_gray" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            />
+
+        <TimePicker
+            android:id="@+id/timePicker"
             android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:background="#FF000000" />
+            android:layout_height="200dp"
+            android:text="@string/sound_default"
+            android:theme="@style/Theme.picker"
+            android:background="@drawable/time_picker_back"
+            android:timePickerMode="spinner" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="15dp"
+            />
 
         <TextView
             android:id="@+id/tvSound"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/sound"
-            android:background="@color/holo_blue_dark"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginRight="10dp"
+            android:background="#cc33aaFF"
             android:textColor="@android:color/background_light"
-            android:textSize="30sp" />
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/tvAlarmSound"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/sound_default"
-            android:textSize="30sp" />
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginRight="10dp"
+            android:textSize="20sp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/light_gray"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            />
+        <TextView
+            android:id="@+id/determine_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="@string/store_set"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:background="@color/light_dark_green"
+            android:textColor="@android:color/background_light"
+            android:textSize="24sp" />
+        <TextView
+            android:id="@+id/back_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:text="@string/cancel_return"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginRight="50dp"
+            android:gravity="center"
+            android:background="#99ff2023"
+            android:textColor="@android:color/background_light"
+            android:textSize="18sp" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

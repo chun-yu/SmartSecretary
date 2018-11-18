@@ -30,7 +30,7 @@
     <string name="open_Alaem">開 啟 提 醒</string>
     <string name="close_Alaem">關 閉 提 醒</string>
     <string name="new_success">新 增 提 醒</string>
-    <string name="brfore_time">此設定" 時間已過 "，無法開啟提醒</string>
+    <string name="brfore_time">輸入的" 時間已過 "，無法開啟提醒</string>
     <string name="reset_time">請重新設定日期時間</string>
     <string name="close_clock">關閉鬧鐘</string>
     <string name="sound_default">預設</string>
@@ -42,4 +42,8 @@
     <string name="saturday">星期六</string>
     <string name="sunday">星期日</string>
     <string name="sure_delete">確定要  刪除  </string>
+    <string name="sure_change">確定要  更改 嗎?</string>
+    <string name="sure_determine">確定更改  </string>
+    <string name="store_set">儲  存  設  定</string>
+    <string name="cancel_return">取 消 返 回</string>
 </resources>

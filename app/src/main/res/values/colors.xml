@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="light_green">#ccaaffaa</color>
+    <color name="light_dark_green">#ee88dd77</color>
     <color name="pink">#99ff8888</color>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryLight">#ee3F51b5</color>

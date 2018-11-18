@@ -58,4 +58,11 @@
         <item name="android:background">@drawable/alarm_linear</item>
         <item name="android:padding">10dip</item>
     </style>
+    <style name="Theme.picker" parent="android:Theme.Holo.Dialog">
+        <item name="android:textSize">20sp</item>
+        <item name="android:editTextStyle">@style/Widget.EditText.White</item>
+    </style>
+    <style name="Widget.EditText.White" parent="@android:style/Widget.EditText">
+        <item name="android:textColor">@color/dark_trans_red</item>
+    </style>
 </resources>
