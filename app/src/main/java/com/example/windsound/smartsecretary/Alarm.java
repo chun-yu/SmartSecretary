@@ -54,7 +54,7 @@ public class Alarm extends Activity {
     View view_alarm_display;
     int YMD[] = new int[3];
     int nowYear, nowMonth, nowDate, nowHour, nowMin;
-
+    Button btnBack ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +136,12 @@ public class Alarm extends Activity {
                 }, nowHour, nowMin, false).show();
             }
         });
+        btnBack.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     private void initView() {
@@ -143,6 +149,7 @@ public class Alarm extends Activity {
         //alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         fabNewAlarm = (FloatingActionButton)findViewById(R.id.fabNewAlarm);
         LLV = (LinearLayout)findViewById(R.id.LLV);
+        btnBack = (Button) findViewById(R.id.btnBack);
     }
 
     private void setListener(final SQLiteDatabase db, Switch sw, TextView tv, final int index) {
@@ -418,10 +425,13 @@ public class Alarm extends Activity {
         //Toast.makeText(this, "取消鬧鐘", Toast.LENGTH_SHORT).show();
     }
 
-    // 返回activity页面刷新
-    protected void onActivityResult(int request, int requestCode ,Intent data) {
-        final SQLiteDatabase write_db = helper.getWritableDatabase();
-        if (request == RESULT_OK && requestCode  == 100)
-            showTime(write_db);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        SQLiteDatabase write_db = helper.getWritableDatabase();
+        if (requestCode == 100) {
+            if (resultCode == RESULT_OK) {
+                showTime(write_db);
+            }
+        }
     }
 }

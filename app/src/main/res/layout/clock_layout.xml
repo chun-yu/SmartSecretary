@@ -15,17 +15,35 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal">
-
+            <Button
+                android:id="@+id/btnBack"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:background="@color/colorPrimaryLight"
+                android:text="@string/back"
+                android:textSize="16dp"
+                android:textColor="@android:color/background_light" />
             <TextView
                 android:id="@+id/tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
                 android:background="@color/colorPrimaryLight"
                 android:gravity="center"
                 android:text="@string/my_alarm"
+                android:textStyle="bold"
                 android:textColor="@android:color/background_light"
-                android:textSize="30sp" />
+                android:textSize="24sp" />
+            <Button
+                android:id="@+id/notThing"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:background="@color/colorPrimaryLight"
+                android:enabled="false"
+                android:textSize="16dp"
+                android:textColor="@android:color/background_light" />
         </LinearLayout>
 
         <ScrollView
