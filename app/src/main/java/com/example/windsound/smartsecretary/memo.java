@@ -69,21 +69,23 @@ public class memo extends Activity {
                 show_new_memo(v);
             }
         });
-        search_title = (EditText)findViewById(R.id.search_title);
         search_btn = (ImageButton) findViewById(R.id.search_btn);
         search_btn.setOnClickListener( new View.OnClickListener(){
-            public void onClick (View v){
+            public void onClick (final View v){
                 LayoutInflater li = LayoutInflater.from(context);
-                View promptsView = li.inflate(R.layout.search_title, null);
+                final View promptsView = li.inflate(R.layout.search_title, null);
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setView(promptsView);
-                final EditText userInput = (EditText) promptsView.findViewById(R.id.search_title);
+                search_title = (EditText) promptsView.findViewById(R.id.search_title);
+
+                alertDialogBuilder.setView(promptsView);
+
                 alertDialogBuilder
                         .setCancelable(false)
                         .setPositiveButton("確定",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog,int id) {
-                                        dialog.cancel();
+                                        search_title_to_click();
                                     }
                                 })
                         .setNegativeButton("取消",
@@ -92,11 +94,14 @@ public class memo extends Activity {
                                         dialog.cancel();
                                     }
                                 });
+
                 AlertDialog alertDialog = alertDialogBuilder.create();
                 alertDialog.show();
             }
-        });
+        }
+        );
     }
+
 
     private void show_memo_to_click() {
         res = helper.getInfoData();
@@ -132,7 +137,7 @@ public class memo extends Activity {
                 small = i-1; break;
             }
         }
-        putin_array_add_show(datearrary,big,small);
+        putin_array_add_show(datearrary,big,small,null);
     }
     private void show_new_memo(View v) {
         String date = AddItem.getToday();
@@ -140,7 +145,7 @@ public class memo extends Activity {
         PopArticle(v,-1,time,0,date,null,null);
     }
 
-    private void putin_array_add_show(int[] datearrary,int big,int small){
+    private void putin_array_add_show(int[] datearrary,int big,int small,String key_word){
         boolean putid = false;
         ArrayList<Integer> small_datearray = new ArrayList<Integer>();
         ArrayList<Integer> big_datearray = new ArrayList<Integer>();
@@ -151,29 +156,38 @@ public class memo extends Activity {
         for (int i = big; i < datearrary.length; i++) {
             int k = datearrary[i];
             res = helper.getInfoData();
-            while (res.moveToNext()) {
-                String s2 = res.getString(3);String s3 = res.getString(1);
-                splitarrary = s2.split("/");
-                splitarrary2 = s3.split(":");
-                int date = Integer.parseInt(splitarrary[0]) * 10000 +Integer.parseInt(splitarrary[1]) * 100 + Integer.parseInt(splitarrary[2]);
-                int date_time= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
-                        +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
-                String text1 = res.getString(4);
-                String text2 = res.getString(5);
-                if (date == k) {
-                    putid = true;
-                    for (int j = 0; j < big_datearray.size(); j++) {
-                        if (big_datearray.get(j) == res.getInt(0)) {
-                            putid = false;
+            res.moveToFirst();
+            if (res.getCount()>0) {
+                do {
+                    String s2 = res.getString(3);
+                    String s3 = res.getString(1);
+                    splitarrary = s2.split("/");
+                    splitarrary2 = s3.split(":");
+                    int date = Integer.parseInt(splitarrary[0]) * 10000 + Integer.parseInt(splitarrary[1]) * 100 + Integer.parseInt(splitarrary[2]);
+                    int date_time = Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                            + Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+                    String text1 = res.getString(4);
+                    String text2 = res.getString(5);
+                    if (date == k) {
+                        putid = true;
+                        for (int j = 0; j < big_datearray.size(); j++) {
+                            if (big_datearray.get(j) == res.getInt(0)) {
+                                putid = false;
+                            }
+                        }
+                        if (key_word != null) {
+                            if (!res.getString(4).contains(key_word)) {
+                                putid = false;
+                            }
+                        }
+                        if (putid) {
+                            if (text1 != null && text2 != null) {
+                                big_datearray.add(date_time);
+                            }
                         }
                     }
-                    if (putid) {
-                        if(text1 != null && text2 != null){
-                            big_datearray.add(date_time);
-                        }
-                    }
-                }
-            }
+                }while (res.moveToNext());
+            }res.close();
         }
         Collections.sort(big_datearray);
         String  today = AddItem.getToday();     splitarrary = today.split("/");
@@ -191,141 +205,183 @@ public class memo extends Activity {
         for (int i = big_date ; i < big_datearray.size() ; i++){   //放入今天時間 尚未到期的
             int k = big_datearray.get(i);
             res = helper.getInfoData();
-            while (res.moveToNext()) {
-                String s2 = res.getString(3);String s3 = res.getString(1);
-                splitarrary = s2.split("/");
-                splitarrary2 = s3.split(":");
-                int date_time= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
-                        +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
-                if (date_time == k) {
-                    putid = true;
-                    for (int j = 0; j < big_idarrary.size(); j++) {
-                        if (big_idarrary.get(j) == res.getInt(0)) {
-                            putid = false;
+            res.moveToFirst();
+            if (res.getCount()>0) {
+                do {
+                    String s2 = res.getString(3);
+                    String s3 = res.getString(1);
+                    splitarrary = s2.split("/");
+                    splitarrary2 = s3.split(":");
+                    int date_time = Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                            + Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+                    if (date_time == k) {
+                        putid = true;
+                        for (int j = 0; j < big_idarrary.size(); j++) {
+                            if (big_idarrary.get(j) == res.getInt(0)) {
+                                putid = false;
+                            }
+                        }
+                        if (key_word != null) {
+                            if (!res.getString(4).contains(key_word)) {
+                                putid = false;
+                            }
+                        }
+                        if (putid) {
+                            big_idarrary.add(res.getInt(0));
                         }
                     }
-                    if (putid) {
-                        big_idarrary.add(res.getInt(0));
-                    }
-                }
-            }
+                }while (res.moveToNext());
+            }res.close();
         }
         for (int i = small_date ; i >= 0 ; i--){   //放入今天時間 已經到期的 由最近時間往下排
             int k = big_datearray.get(i);
             res = helper.getInfoData();
-            while (res.moveToNext()) {
-                String s2 = res.getString(3);String s3 = res.getString(1);
-                splitarrary = s2.split("/");
-                splitarrary2 = s3.split(":");
-                int date_time= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
-                        +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
-                if (date_time == k) {
-                    putid = true;
-                    for (int j = 0; j < big_idarrary.size(); j++) {
-                        if (big_idarrary.get(j) == res.getInt(0)) {
-                            putid = false;
+            res.moveToFirst();
+            if (res.getCount()>0) {
+                do {
+                    String s2 = res.getString(3);
+                    String s3 = res.getString(1);
+                    splitarrary = s2.split("/");
+                    splitarrary2 = s3.split(":");
+                    int date_time = Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                            + Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+                    if (date_time == k) {
+                        putid = true;
+                        for (int j = 0; j < big_idarrary.size(); j++) {
+                            if (big_idarrary.get(j) == res.getInt(0)) {
+                                putid = false;
+                            }
+                        }
+                        if (key_word != null) {
+                            if (!res.getString(4).contains(key_word)) {
+                                putid = false;
+                            }
+                        }
+                        if (putid) {
+                            big_idarrary.add(res.getInt(0));
                         }
                     }
-                    if (putid) {
-                        big_idarrary.add(res.getInt(0));
-                    }
-                }
-            }
+                }while (res.moveToNext());
+            }res.close();
         }
         //排昨天以前
         for (int i = 0; i <= small; i++) {
             int k = datearrary[i];
             res = helper.getInfoData();
-            while (res.moveToNext()) {
-                String s2 = res.getString(3);String s3 = res.getString(1);
-                splitarrary = s2.split("/");
-                splitarrary2 = s3.split(":");
-                int date = Integer.parseInt(splitarrary[0]) * 10000 +Integer.parseInt(splitarrary[1]) * 100 + Integer.parseInt(splitarrary[2]);
-                int date_time= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
-                        +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
-                String text1 = res.getString(4);
-                String text2 = res.getString(5);
-                if (date == k) {
-                    putid = true;
-                    for (int j = 0; j < small_datearray.size(); j++) {
-                        if (small_datearray.get(j) == res.getInt(0)) {
-                            putid = false;
+            res.moveToFirst();
+            if (res.getCount()>0) {
+                do {
+                    String s2 = res.getString(3);
+                    String s3 = res.getString(1);
+                    splitarrary = s2.split("/");
+                    splitarrary2 = s3.split(":");
+                    int date = Integer.parseInt(splitarrary[0]) * 10000 + Integer.parseInt(splitarrary[1]) * 100 + Integer.parseInt(splitarrary[2]);
+                    int date_time = Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                            + Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+                    String text1 = res.getString(4);
+                    String text2 = res.getString(5);
+                    if (date == k) {
+                        putid = true;
+                        for (int j = 0; j < small_datearray.size(); j++) {
+                            if (small_datearray.get(j) == res.getInt(0)) {
+                                putid = false;
+                            }
+                        }
+                        if (key_word != null) {
+                            if (!res.getString(4).contains(key_word)) {
+                                putid = false;
+                            }
+                        }
+                        if (putid) {
+                            if (text1 != null && text2 != null) {
+                                small_datearray.add(date_time);
+                            }
                         }
                     }
-                    if (putid) {
-                        if(text1 != null && text2 != null){
-                            small_datearray.add(date_time);
-                        }
-                    }
-                }
-            }
+                }while (res.moveToNext());
+            }res.close();
         }
         Collections.sort(small_datearray);
         for (int i = small_datearray.size(); i > 0; i--) {
             int k = small_datearray.get(i-1);
             res = helper.getInfoData();
-            while (res.moveToNext()) {
-                String s2 = res.getString(3);String s3 = res.getString(1);
-                splitarrary = s2.split("/");
-                splitarrary2 = s3.split(":");
-                int date_time= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
-                        +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
-                if (date_time == k) {
-                    putid = true;
-                    for (int j = 0; j < small_idarrary.size(); j++) {
-                        if (small_idarrary.get(j) == res.getInt(0)) {
-                            putid = false;
+            res.moveToFirst();
+            if (res.getCount()>0) {
+                do {
+                    String s2 = res.getString(3);
+                    String s3 = res.getString(1);
+                    splitarrary = s2.split("/");
+                    splitarrary2 = s3.split(":");
+                    int date_time = Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                            + Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+                    if (date_time == k) {
+                        putid = true;
+                        for (int j = 0; j < small_idarrary.size(); j++) {
+                            if (small_idarrary.get(j) == res.getInt(0)) {
+                                putid = false;
+                            }
+                        }
+                        if (key_word != null) {
+                            if (!res.getString(4).contains(key_word)) {
+                                putid = false;
+                            }
+                        }
+                        if (putid) {
+                            small_idarrary.add(res.getInt(0));
                         }
                     }
-                    if (putid) {
-                            small_idarrary.add(res.getInt(0));
-                    }
-                }
-            }
+                }while (res.moveToNext());
+            }res.close();
         }
         for (int i = 0; i < big_idarrary.size(); i++) {
             res = helper.getInfoData();
-            if(i==0){
-                LinearLayout before_text = new LinearLayout(this);
-                before_text.setBackgroundColor(getResources().getColor(R.color.holo_blue_dark));
-                LinearLayout.LayoutParams  params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,60);
-                params.setMargins(30,20,30,0);
-                before_text.setLayoutParams(params);
-                TextView tv = new TextView(this);
-                tv.setTextSize(16);
-                tv.setText("今日");
-                tv.setTextColor(getResources().getColor(R.color.gray));
-                tv.setPadding(25,0,0,0);
-                before_text.addView(tv);
-                memo_show.addView(before_text);
-            }
-            while (res.moveToNext()) {
-                if (big_idarrary.get(i) == res.getInt(0)) {
-                    add_table_show(res.getInt(0),getResources().getColor(R.color.little_holo_blue_dark),res.getString(3), res.getString(4), res.getString(1),res.getInt(2),res.getString(5));
+            res.moveToFirst();
+            if (res.getCount()>0) {
+                if (i == 0) {
+                    LinearLayout before_text = new LinearLayout(this);
+                    before_text.setBackgroundColor(getResources().getColor(R.color.holo_blue_dark));
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 60);
+                    params.setMargins(30, 20, 30, 0);
+                    before_text.setLayoutParams(params);
+                    TextView tv = new TextView(this);
+                    tv.setTextSize(16);
+                    tv.setText("今日");
+                    tv.setTextColor(getResources().getColor(R.color.gray));
+                    tv.setPadding(25, 0, 0, 0);
+                    before_text.addView(tv);
+                    memo_show.addView(before_text);
                 }
-            }
+                while (res.moveToNext()) {
+                    if (big_idarrary.get(i) == res.getInt(0)) {
+                        add_table_show(res.getInt(0), getResources().getColor(R.color.little_holo_blue_dark), res.getString(3), res.getString(4), res.getString(1), res.getInt(2), res.getString(5));
+                    }
+                }
+            }res.close();
         }
         for (int i = 0; i < small_idarrary.size(); i++) {
             res = helper.getInfoData();
-            if(i==0){
-                LinearLayout before_text = new LinearLayout(this);
-                before_text.setBackgroundColor(getResources().getColor(R.color.dark_trans_red));
-                LinearLayout.LayoutParams  params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,60);
-                params.setMargins(30,20,30,0);
-                before_text.setLayoutParams(params);
-                TextView tv = new TextView(this);
-                tv.setTextSize(16);
-                tv.setText("昨日以前");
-                tv.setTextColor(getResources().getColor(R.color.gray));
-                tv.setPadding(25,0,0,0);
-                before_text.addView(tv);
-                memo_show.addView(before_text);
-            }
-            while (res.moveToNext()) {
-                if (small_idarrary.get(i) == res.getInt(0)) {
-                    add_table_show(res.getInt(0),getResources().getColor(R.color.trans_red),res.getString(3), res.getString(4), res.getString(1),res.getInt(2),res.getString(5));
+            res.moveToFirst();
+            if (res.getCount()>0) {
+                if (i == 0) {
+                    LinearLayout before_text = new LinearLayout(this);
+                    before_text.setBackgroundColor(getResources().getColor(R.color.dark_trans_red));
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 60);
+                    params.setMargins(30, 20, 30, 0);
+                    before_text.setLayoutParams(params);
+                    TextView tv = new TextView(this);
+                    tv.setTextSize(16);
+                    tv.setText("昨日以前");
+                    tv.setTextColor(getResources().getColor(R.color.gray));
+                    tv.setPadding(25, 0, 0, 0);
+                    before_text.addView(tv);
+                    memo_show.addView(before_text);
                 }
-            }
+                while (res.moveToNext()) {
+                    if (small_idarrary.get(i) == res.getInt(0)) {
+                        add_table_show(res.getInt(0), getResources().getColor(R.color.trans_red), res.getString(3), res.getString(4), res.getString(1), res.getInt(2), res.getString(5));
+                    }
+                }
+            }res.close();
         }
     }
 
@@ -580,4 +636,53 @@ public class memo extends Activity {
                 })
                 .show();
     }
+
+    private void search_title_to_click(){
+        for (int i = memo_show.getChildCount(); i >= 0; i--) {
+            memo_show.removeView(memo_show.getChildAt(i));
+        }
+        String s1 = search_title.getText().toString();
+        Cursor cursor = helper.getInfoData();
+        int searchid[] = new int[100];
+        String[] splitarrary = new String[3];
+        int n = 0;
+        if (cursor.getCount()>0){    // 若有資料
+            cursor.moveToFirst();    // 移到第 1 筆資料
+            do{        // 逐筆讀出資料
+                String title = cursor.getString(4);
+                if (title!=null){
+                    if (title.contains(s1)){
+                        String s2 = cursor.getString(3);
+                        splitarrary = s2.split("/");
+                        int year = Integer.parseInt(splitarrary[0]);
+                        int month = Integer.parseInt(splitarrary[1]);
+                        int day = Integer.parseInt(splitarrary[2]);
+                        searchid[n] = year * 10000 + month * 100 + day;
+                        n++;
+                    }
+                }
+
+            } while(cursor.moveToNext());    // 有一下筆就繼續迴圈
+
+        }
+        Arrays.sort(searchid);
+        String  today = AddItem.getToday();
+        splitarrary = today.split("/");
+        int today_year = Integer.parseInt(splitarrary[0]);
+        int today_month = Integer.parseInt(splitarrary[1]);
+        int today_day = Integer.parseInt(splitarrary[2]);
+        n = today_year * 10000 + today_month * 100 + today_day;
+        int big = searchid.length;
+        int small = 0;
+        for (int i = searchid.length; i > 0;i--){
+            if(searchid[i-1]>=n){
+                big = big -1;
+            }else {
+                small = i-1; break;
+            }
+        }
+        putin_array_add_show(searchid, big, small,s1);
+    }
+
+
 }
