@@ -58,11 +58,15 @@ public class memo extends Activity {
         back_btn2 = (Button) findViewById(R.id.back_btn2);
         back_btn2.setOnClickListener( new View.OnClickListener(){
             public void onClick (View v){
-                finish();
+                if(back_btn2.getText().equals(getString(R.string.back)))
+                    finish();
+                else{
+                    show_memo_to_click();
+                    back_btn2.setText(getString(R.string.back));
+                }
             }
         });
         memo_show = (LinearLayout) findViewById(R.id.memo_show);
-        show_memo_to_click();
         addmemo_fbtn = (FloatingActionButton) findViewById(R.id.addmemo_fbtn);
         addmemo_fbtn.setOnClickListener( new View.OnClickListener(){
             public void onClick (View v){
@@ -86,6 +90,9 @@ public class memo extends Activity {
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog,int id) {
                                         search_title_to_click();
+                                        InputMethodManager inputMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                        inputMgr.toggleSoftInput(InputMethodManager.HIDE_NOT_ALWAYS, 0);
+                                        back_btn2.setText(getString(R.string.cancel));
                                     }
                                 })
                         .setNegativeButton("取消",
@@ -100,6 +107,7 @@ public class memo extends Activity {
             }
         }
         );
+        show_memo_to_click();
     }
 
 
@@ -147,13 +155,28 @@ public class memo extends Activity {
 
     private void putin_array_add_show(int[] datearrary,int big,int small,String key_word){
         boolean putid = false;
+        ArrayList<Integer> today_datearray = new ArrayList<Integer>();
+        ArrayList<Integer> future_datearray = new ArrayList<Integer>();
+        ArrayList<Integer> future_idarrary = new ArrayList<Integer>();
+        ArrayList<Integer> today_idarrary = new ArrayList<Integer>();
         ArrayList<Integer> small_datearray = new ArrayList<Integer>();
-        ArrayList<Integer> big_datearray = new ArrayList<Integer>();
-        ArrayList<Integer> big_idarrary = new ArrayList<Integer>();
         ArrayList<Integer> small_idarrary = new ArrayList<Integer>();
         String[] splitarrary = new String[3];   String[] splitarrary2 = new String[2];
-        //排今天
-        for (int i = big; i < datearrary.length; i++) {
+        //找未來的與今天的分界
+        String  today = AddItem.getToday();
+        splitarrary = today.split("/");
+        int today_year = Integer.parseInt(splitarrary[0]);int today_month = Integer.parseInt(splitarrary[1]);int today_day = Integer.parseInt(splitarrary[2]);
+        int count = today_year * 10000 + today_month * 100 + today_day;int date_split = big;
+        for (int i = big; i < datearrary.length;i++){
+            if(datearrary[i] > count){
+                date_split = i;
+                break;
+            }else{
+                date_split = i+1;
+            }
+        }
+        //排今天時間
+        for (int i = big; i < date_split; i++) {
             int k = datearrary[i];
             res = helper.getInfoData();
             res.moveToFirst();
@@ -170,8 +193,8 @@ public class memo extends Activity {
                     String text2 = res.getString(5);
                     if (date == k) {
                         putid = true;
-                        for (int j = 0; j < big_datearray.size(); j++) {
-                            if (big_datearray.get(j) == res.getInt(0)) {
+                        for (int j = 0; j < today_datearray.size(); j++) {
+                            if (today_datearray.get(j) == res.getInt(0)) {
                                 putid = false;
                             }
                         }
@@ -182,28 +205,16 @@ public class memo extends Activity {
                         }
                         if (putid) {
                             if (text1 != null && text2 != null) {
-                                big_datearray.add(date_time);
+                                today_datearray.add(date_time);
                             }
                         }
                     }
                 }while (res.moveToNext());
             }res.close();
         }
-        Collections.sort(big_datearray);
-        String  today = AddItem.getToday();     splitarrary = today.split("/");
-        String  today_time = AddItem.getNewTime();   splitarrary2 = today_time.split(":");
-        int now = Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
-                +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
-        int big_date = big_datearray.size();    int small_date = -1;
-        for (int i = big_datearray.size(); i > 0;i--){  //擷取當下時間點的 分界
-            if(big_datearray.get(i-1) >= now){
-                big_date = big_date -1;
-            }else {
-                small_date = big_date-1; break;
-            }
-        }
-        for (int i = big_date ; i < big_datearray.size() ; i++){   //放入今天時間 尚未到期的
-            int k = big_datearray.get(i);
+        Collections.sort(today_datearray);
+        for (int i = 1; i <= today_datearray.size(); i++) {
+            int k = today_datearray.get(i-1);
             res = helper.getInfoData();
             res.moveToFirst();
             if (res.getCount()>0) {
@@ -216,8 +227,8 @@ public class memo extends Activity {
                             + Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
                     if (date_time == k) {
                         putid = true;
-                        for (int j = 0; j < big_idarrary.size(); j++) {
-                            if (big_idarrary.get(j) == res.getInt(0)) {
+                        for (int j = 0; j < today_idarrary.size(); j++) {
+                            if (today_idarrary.get(j) == res.getInt(0)) {
                                 putid = false;
                             }
                         }
@@ -227,14 +238,52 @@ public class memo extends Activity {
                             }
                         }
                         if (putid) {
-                            big_idarrary.add(res.getInt(0));
+                            today_idarrary.add(res.getInt(0));
                         }
                     }
                 }while (res.moveToNext());
             }res.close();
         }
-        for (int i = small_date ; i >= 0 ; i--){   //放入今天時間 已經到期的 由最近時間往下排
-            int k = big_datearray.get(i);
+        //排未來時間
+        for (int i = date_split; i < datearrary.length; i++) {
+            int k = datearrary[i];
+            res = helper.getInfoData();
+            res.moveToFirst();
+            if (res.getCount()>0) {
+                do {
+                    String s2 = res.getString(3);
+                    String s3 = res.getString(1);
+                    splitarrary = s2.split("/");
+                    splitarrary2 = s3.split(":");
+                    int date = Integer.parseInt(splitarrary[0]) * 10000 + Integer.parseInt(splitarrary[1]) * 100 + Integer.parseInt(splitarrary[2]);
+                    int date_time = Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                            + Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+                    String text1 = res.getString(4);
+                    String text2 = res.getString(5);
+                    if (date == k) {
+                        putid = true;
+                        for (int j = 0; j < future_datearray.size(); j++) {
+                            if (future_datearray.get(j) == res.getInt(0)) {
+                                putid = false;
+                            }
+                        }
+                        if (key_word != null) {
+                            if (!res.getString(4).contains(key_word)) {
+                                putid = false;
+                            }
+                        }
+                        if (putid) {
+                            if (text1 != null && text2 != null) {
+                                future_datearray.add(date_time);
+                            }
+                        }
+                    }
+                }while (res.moveToNext());
+            }res.close();
+        }
+        Collections.sort(future_datearray);
+        for (int i = 1; i <= future_datearray.size(); i++) {
+            int k = future_datearray.get(i-1);
             res = helper.getInfoData();
             res.moveToFirst();
             if (res.getCount()>0) {
@@ -247,8 +296,8 @@ public class memo extends Activity {
                             + Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
                     if (date_time == k) {
                         putid = true;
-                        for (int j = 0; j < big_idarrary.size(); j++) {
-                            if (big_idarrary.get(j) == res.getInt(0)) {
+                        for (int j = 0; j < future_idarrary.size(); j++) {
+                            if (future_idarrary.get(j) == res.getInt(0)) {
                                 putid = false;
                             }
                         }
@@ -258,7 +307,7 @@ public class memo extends Activity {
                             }
                         }
                         if (putid) {
-                            big_idarrary.add(res.getInt(0));
+                            future_idarrary.add(res.getInt(0));
                         }
                     }
                 }while (res.moveToNext());
@@ -333,7 +382,7 @@ public class memo extends Activity {
                 }while (res.moveToNext());
             }res.close();
         }
-        for (int i = 0; i < big_idarrary.size(); i++) {
+        for (int i = 0; i < today_idarrary.size(); i++) {
             res = helper.getInfoData();
             res.moveToFirst();
             if (res.getCount()>0) {
@@ -351,11 +400,41 @@ public class memo extends Activity {
                     before_text.addView(tv);
                     memo_show.addView(before_text);
                 }
-                while (res.moveToNext()) {
-                    if (big_idarrary.get(i) == res.getInt(0)) {
-                        add_table_show(res.getInt(0), getResources().getColor(R.color.little_holo_blue_dark), res.getString(3), res.getString(4), res.getString(1), res.getInt(2), res.getString(5));
+                do{
+                    if (today_idarrary.get(i) == res.getInt(0)) {
+                        String am_pm = res.getString(1);
+                        splitarrary2 = am_pm.split(":");
+                        if((Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1])) >= 1200)
+                            add_table_show(res.getInt(0), getResources().getColor(R.color.little_holo_blue_dark), " 下 午 ", res.getString(4), res.getString(1), res.getInt(2), res.getString(5));
+                        else
+                            add_table_show(res.getInt(0), getResources().getColor(R.color.little_holo_blue_dark), " 上 午 ", res.getString(4), res.getString(1), res.getInt(2), res.getString(5));
                     }
+                }while (res.moveToNext());
+            }res.close();
+        }
+        for (int i = 0; i < future_idarrary.size(); i++) {
+            res = helper.getInfoData();
+            res.moveToFirst();
+            if (res.getCount()>0) {
+                if (i == 0) {
+                    LinearLayout before_text = new LinearLayout(this);
+                    before_text.setBackgroundColor(getResources().getColor(R.color.orange));
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 60);
+                    params.setMargins(30, 20, 30, 0);
+                    before_text.setLayoutParams(params);
+                    TextView tv = new TextView(this);
+                    tv.setTextSize(16);
+                    tv.setText("未來");
+                    tv.setTextColor(getResources().getColor(R.color.gray));
+                    tv.setPadding(25, 0, 0, 0);
+                    before_text.addView(tv);
+                    memo_show.addView(before_text);
                 }
+                do{
+                    if (future_idarrary.get(i) == res.getInt(0)) {
+                        add_table_show(res.getInt(0), getResources().getColor(R.color.yellow), res.getString(3), res.getString(4), res.getString(1), res.getInt(2), res.getString(5));
+                    }
+                }while (res.moveToNext());
             }res.close();
         }
         for (int i = 0; i < small_idarrary.size(); i++) {
@@ -376,11 +455,11 @@ public class memo extends Activity {
                     before_text.addView(tv);
                     memo_show.addView(before_text);
                 }
-                while (res.moveToNext()) {
+                do{
                     if (small_idarrary.get(i) == res.getInt(0)) {
                         add_table_show(res.getInt(0), getResources().getColor(R.color.trans_red), res.getString(3), res.getString(4), res.getString(1), res.getInt(2), res.getString(5));
                     }
-                }
+                }while (res.moveToNext());
             }res.close();
         }
     }
@@ -445,7 +524,10 @@ public class memo extends Activity {
                 LinearLayout.LayoutParams.FILL_PARENT, 9));
         TextView tv2 = new TextView(this);
         tv2.setTextSize(20);
-        tv2.setText(getDay_of_week(date));
+        if(date.equals(" 下 午 ") || date.equals(" 上 午 ")) //今天的話做日期判斷
+            tv2.setText(getDay_of_week(AddItem.getToday()));
+        else
+            tv2.setText(getDay_of_week(date));
         tv2.setTextColor(getResources().getColor(R.color.holo_blue_dark));
         tv2.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.FILL_PARENT,

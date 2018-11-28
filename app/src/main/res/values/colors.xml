@@ -15,5 +15,6 @@
     <color name="red">#ff0000</color>
     <color name="trans_red">#33ff2222</color>
     <color name="dark_trans_red">#ccff3232</color>
-    <color name="orange">#f7df2d</color>
+    <color name="orange">#f7aa11</color>
+    <color name="yellow">#33f7df66</color>
 </resources>
