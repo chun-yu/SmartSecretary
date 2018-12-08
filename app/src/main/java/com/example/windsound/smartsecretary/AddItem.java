@@ -203,23 +203,7 @@ public class AddItem extends Activity {
                     Toast.makeText(getApplicationContext(), "Activity result failed.", Toast.LENGTH_SHORT).show();
                 }
                 break;
-            }case PHOTO: {
-                if (resultCode == Activity.RESULT_OK) {
-                    prepareTessData();
-                    Uri uri = data.getData();
-                    String[] proj = { MediaStore.Images.Media.DATA };
-                    Cursor actualimagecursor = managedQuery(uri,proj,null,null,null);
-                    int actual_image_column_index = actualimagecursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                    actualimagecursor.moveToFirst();
-                    mCurrentPhotoPath = actualimagecursor.getString(actual_image_column_index);
-                    startOCR(outputFileDir);
-                } else if (resultCode == Activity.RESULT_CANCELED) {
-                    Toast.makeText(getApplicationContext(), "Result canceled.", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Activity result failed.", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            }
+            }default:break;
         }
     }
 
@@ -249,11 +233,9 @@ public class AddItem extends Activity {
                         dispatchTakePictureIntent();
                     }
                 })
-                .setNegativeButton("相簿選取", new DialogInterface.OnClickListener() {
+                .setNegativeButton("取 消", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent();
-                        intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-                        startActivityForResult(intent, PHOTO);
+                        dialog.cancel();
                     }
                 });
         AlertDialog logout_dialog = builder.create();
@@ -274,8 +256,7 @@ public class AddItem extends Activity {
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(AddItem.this,
-                        BuildConfig.APPLICATION_ID + ".provider",
-                        photoFile);
+                        BuildConfig.APPLICATION_ID + ".provider", photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, DO_TESS);
             }
@@ -331,7 +312,7 @@ public class AddItem extends Activity {
             String result = this.getText(bitmap);
             content_text.setText(result);
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            Toast.makeText(getApplicationContext(), "照片判讀錯誤，請拍攝清楚", Toast.LENGTH_SHORT).show();
         }//這行不確定有沒有打對
     }
 
@@ -453,13 +434,14 @@ public class AddItem extends Activity {
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
                         helper.updateTimeInfo(write_db, putin_null_dbID, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString(), "預設", null);
-                        Alarm.setAlarm(AddItem.this, Integer.parseInt(splitarrary[0]), Integer.parseInt(splitarrary[1]), Integer.parseInt(splitarrary[2]), Integer.parseInt(splitarrary2[0]), Integer.parseInt(splitarrary2[1]), putin_null_dbID);
+                        Alarm.setAlarm(AddItem.this, Integer.parseInt(splitarrary[0]), Integer.parseInt(splitarrary[1]), Integer.parseInt(splitarrary[2]), Integer.parseInt(splitarrary2[0]), Integer.parseInt(splitarrary2[1]), putin_null_dbID,title_text.getText().toString());
                         finish();
                     } else {
                         Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
                         helper.updateTimeInfo(write_db, putin_null_dbID, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString(), "預設", null);
+                        memo.notice(AddItem.this,putin_null_dbID,date_view.getText().toString(),btn_clock_view.getText().toString(),title_text.getText().toString());
                         finish();
                     }
                 } else {
@@ -467,14 +449,15 @@ public class AddItem extends Activity {
                         Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
-                        helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString(), "預設", null);
-                        Alarm.setAlarm(AddItem.this, Integer.parseInt(splitarrary[0]), Integer.parseInt(splitarrary[1]), Integer.parseInt(splitarrary[2]), Integer.parseInt(splitarrary2[0]), Integer.parseInt(splitarrary2[1]), helper.getDBcount());
+                        int idd = helper.insertInfo(write_db, btn_clock_view.getText().toString(), 1, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString(), "預設", null);
+                        Alarm.setAlarm(AddItem.this, Integer.parseInt(splitarrary[0]), Integer.parseInt(splitarrary[1]), Integer.parseInt(splitarrary[2]), Integer.parseInt(splitarrary2[0]), Integer.parseInt(splitarrary2[1]), idd,title_text.getText().toString());
                         finish();
                     } else {
                         Toast toast = Toast.makeText(AddItem.this, title_text.getText().toString() + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
-                        helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString(), "預設", null);
+                        int idd = helper.insertInfo(write_db, btn_clock_view.getText().toString(), 0, date_view.getText().toString(), title_text.getText().toString(), content_text.getText().toString(), "預設", null);
+                        memo.notice(AddItem.this,idd,date_view.getText().toString(),btn_clock_view.getText().toString(),title_text.getText().toString());
                         finish();
                     }
                 }

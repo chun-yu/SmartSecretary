@@ -1,11 +1,14 @@
 package com.example.windsound.smartsecretary;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -37,6 +40,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+
 public class memo extends Activity {
 
     private DBHelper helper = null;
@@ -47,6 +52,7 @@ public class memo extends Activity {
     private Cursor res;
     PopupWindow popupWindow;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+    private static SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm");
     final Context context = this;
     private EditText search_title;
 
@@ -478,7 +484,10 @@ public class memo extends Activity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(memo.this, title + "     時間 :" + time , Toast.LENGTH_SHORT).show();
-                PopArticle(view,article_id,time,check,date,title,note);
+                if(date.equals(" 下 午 ") || date.equals(" 上 午 ")) //今天的話做日期判斷
+                    PopArticle(view,article_id,time,check,AddItem.getToday(),title,note);
+                else
+                    PopArticle(view,article_id,time,check,date,title,note);
             }
         });
         tr.setOnLongClickListener(new View.OnLongClickListener() {
@@ -486,7 +495,12 @@ public class memo extends Activity {
             public boolean onLongClick(View v) {
                 try
                 {
-                    showAlertDialog(article_id,title,date,time);
+                    if(date.equals(" 上 午 ")) //今天的話做日期判斷
+                        showAlertDialog(article_id,title,AddItem.getToday()+" 上 午 ",time);
+                    else if(date.equals(" 下 午 "))
+                        showAlertDialog(article_id,title,AddItem.getToday()+" 下 午 ",time);
+                    else
+                        showAlertDialog(article_id,title,date,time);
                 }catch(Exception e)
                 {
                     Log.d("Long click", "error");
@@ -666,27 +680,46 @@ public class memo extends Activity {
                 Toast.makeText(memo.this,getString(R.string.input_outline), Toast.LENGTH_LONG).show();
             }else {
                 if (check > 0) {
-                    Toast toast = Toast.makeText(memo.this, s1 + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
                     if (id<0){
-                        helper.insertInfo(write_db,time,0,date,s1,s2,"預設",null);
-                    }else{
-                        helper.updateTimeInfo(write_db, id, time, 1, date, s1, s2, "預設", null);
+                        int idd = helper.insertInfo(write_db,time,0,date,s1,s2,"預設",null);
+                        notice(context,idd,date,time,s1);
+                        Toast toast = Toast.makeText(memo.this, s1 + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+                        popupWindow.dismiss();
+                        InputMethodManager inputMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        inputMgr.toggleSoftInput(InputMethodManager.HIDE_NOT_ALWAYS, 0);
+                        show_memo_to_click();
+                    }else{//有開啟提醒，判斷時間是否過了
+                        String[] splitarrary = new String[3];String[] splitarrary2 = new String[2];
+                        splitarrary = date.split("/");
+                        splitarrary2 = time.split(":");
+                        if(check_if_turn_check_time(splitarrary[0],splitarrary[1],splitarrary[2],splitarrary2[0],splitarrary2[1])) {
+                            helper.updateTimeInfo(write_db, id, time, 1, date, s1, s2, "預設", null);
+                            Alarm.setAlarm(memo.this, Integer.parseInt(splitarrary[0]), Integer.parseInt(splitarrary[1]), Integer.parseInt(splitarrary[2]), Integer.parseInt(splitarrary2[0]), Integer.parseInt(splitarrary2[1]), id,s1);
+                            Toast toast = Toast.makeText(memo.this, s1 + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.open_Alaem), Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.CENTER, 0, 0);
+                            toast.show();
+                            popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+                            popupWindow.dismiss();
+                            InputMethodManager inputMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                            inputMgr.toggleSoftInput(InputMethodManager.HIDE_NOT_ALWAYS, 0);
+                            show_memo_to_click();
+                        }else{//時間過了要跳toast無法完成
+                            Toast.makeText(memo.this, getString(R.string.brfore_time), Toast.LENGTH_SHORT).show();
+                        }
                     }
-                    popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-                    popupWindow.dismiss();
-                    InputMethodManager inputMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputMgr.toggleSoftInput(InputMethodManager.HIDE_NOT_ALWAYS, 0);
-                    show_memo_to_click();
                 } else {
                     Toast toast = Toast.makeText(memo.this, s1 + "  : " + getString(R.string.new_success) + "\n" + getString(R.string.close_Alaem), Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
                     if (id<0){
-                        helper.insertInfo(write_db,time,0,date,s1,s2,"預設",null);
+                        int idd = helper.insertInfo(write_db,time,0,date,s1,s2,"預設",null);
+                        notice(context,idd,date,time,s1);
                     }else{
                         helper.updateTimeInfo(write_db, id, time, 0, date, s1, s2, "預設", null);
+                        notice(memo.this,id,date,time,s1);
                     }
                     popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
                     popupWindow.dismiss();
@@ -707,6 +740,7 @@ public class memo extends Activity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         helper.remove_Note(id);
+                        deleteNotice(memo.this,id);
                         show_memo_to_click();
                     }
                 })
@@ -765,6 +799,42 @@ public class memo extends Activity {
         }
         putin_array_add_show(searchid, big, small,s1);
     }
-
-
+    public static void notice(Context context,int id,String date,String time,String title){
+        Intent intent = new Intent(context,AlarmReceiver.class);
+        String [] splitarrary = new String[3];String [] splitarrary2 = new String[2];
+        splitarrary = date.split("/");splitarrary2 = time.split(":");
+        int today_year = Integer.parseInt(splitarrary[0]);int today_month = Integer.parseInt(splitarrary[1]);int today_day = Integer.parseInt(splitarrary[2]);
+        int hour = Integer.parseInt(splitarrary2[0]);int min = Integer.parseInt(splitarrary2[1]);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(today_year, today_month-1, today_day, hour, min,0);
+        Bundle bundle = new Bundle();
+        bundle.putString("msg","notice");
+        bundle.putInt("index",id);
+        bundle.putString("title",title);
+        bundle.putLong("show_time",calendar.getTimeInMillis());
+        intent.putExtras(bundle);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,id,intent,FLAG_UPDATE_CURRENT);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);
+    }
+    public static void deleteNotice(Context context, int id) {
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, id, intent, FLAG_UPDATE_CURRENT);
+        AlarmReceiver.cancelNotice(context,id);
+        alarmManager.cancel(alarmIntent);
+        alarmIntent = null;
+        //Toast.makeText(this, "取消鬧鐘", Toast.LENGTH_SHORT).show();
+    }
+    private boolean check_if_turn_check_time(String year,String month,String day,String hour,String min){
+        String[] splitarrary = new String[3];String[] splitarrary2 = new String[2];
+        splitarrary = sdf.format(Calendar.getInstance().getTime()).split("/");
+        splitarrary2 = sdf2.format(Calendar.getInstance().getTime()).split(":");
+        int int_now= Integer.parseInt(splitarrary[0]) * 100000000 + Integer.parseInt(splitarrary[1]) * 1000000 + Integer.parseInt(splitarrary[2]) * 10000
+                +Integer.parseInt(splitarrary2[0]) * 100 + Integer.parseInt(splitarrary2[1]);
+        int int_chose_time= Integer.parseInt(year)* 100000000 + Integer.parseInt(month) * 1000000 + Integer.parseInt(day) * 10000
+                +Integer.parseInt(hour) * 100 + Integer.parseInt(min);
+        return int_now < int_chose_time;
+    }
 }

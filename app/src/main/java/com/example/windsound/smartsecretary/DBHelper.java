@@ -48,7 +48,7 @@ public class DBHelper extends SQLiteOpenHelper {
         //onCreate(db);
     }
 
-    public void insertInfo(SQLiteDatabase db, String time,int check, String date, String title, String note, String song, String songPath) {
+    public int insertInfo(SQLiteDatabase db, String time,int check, String date, String title, String note, String song, String songPath) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(TIME, time);
         contentValues.put(CHECK, check);
@@ -57,7 +57,8 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(NOTE, note);
         contentValues.put(SONG, song);
         contentValues.put(SONGPATH, songPath);
-        db.insert(TABLE_NAME, null, contentValues);
+        long idd = db.insert(TABLE_NAME, null, contentValues);
+        return (int)idd;
     }
 
     public void updateTimeInfo(SQLiteDatabase db, int rowId, String time, int check, String date ,String title, String note, String song, String songPath) {
@@ -84,9 +85,13 @@ public class DBHelper extends SQLiteOpenHelper {
     public int getDBcount() {
         int result = 0;
         Cursor cursor = getWritableDatabase().rawQuery("SELECT COUNT(*) FROM " + TABLE_NAME, null);
-        while (cursor.moveToNext()) {
-            result = cursor.getInt(0);
+        if (cursor.getCount()>0) {
+            cursor.moveToFirst();
+            do{
+                result = cursor.getInt(0);
+            }while (cursor.moveToNext());
         }
+        cursor.close();
         return result;
     }
 
@@ -98,5 +103,23 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor res = db.rawQuery("select * from " + TABLE_NAME, null);
         return res;
     }
-    
+    public int getDataId(String time,int check,String date,String title,String note,String song,String songpath) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor res = db.rawQuery("select * from " + TABLE_NAME, null);
+        int result=0;
+        if (res.getCount()>0) {
+            res.moveToFirst();
+            do{
+                if((res.getString(4) != null && res.getString(4).length() != 0)&&
+                        (res.getString(5) != null && res.getString(5).length() != 0)&&
+                        res.getString(1).equals(time)&&res.getInt(2)==check&&
+                        res.getString(3).equals(date)&&res.getString(4).equals(title)&&
+                        res.getString(5).equals(note)&&res.getString(6).equals(song)){
+                    result=res.getInt(0);
+                }
+            }while (res.moveToNext());
+        }
+        res.close();
+        return result;
+    }
 }

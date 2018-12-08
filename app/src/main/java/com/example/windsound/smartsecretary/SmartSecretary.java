@@ -187,8 +187,8 @@ public class SmartSecretary extends Activity {
                     .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            helper.insertInfo(write_db, setTimeFormat(fHour, fMin), 1, setDateFormat(fYear, fMonth, fDate), fTitle, fNote, "預設", null);
-                            Alarm.setAlarm(SmartSecretary.this, fYear, fMonth, fDate, fHour, fMin, helper.getDBcount());
+                            int idd = helper.insertInfo(write_db, setTimeFormat(fHour, fMin), 1, setDateFormat(fYear, fMonth, fDate), fTitle, fNote, "預設", null);
+                            Alarm.setAlarm(SmartSecretary.this, fYear, fMonth, fDate, fHour, fMin, idd,fTitle);
                             if (result.get(0).contains("提醒")) {
                                 Toast.makeText(SmartSecretary.this, "提醒已設定 時間為" + setTimeFormat(fHour, fMin), Toast.LENGTH_SHORT).show();
                             }

@@ -56,7 +56,7 @@ public class AlarmWake extends Activity {
         //mp = new MediaPlayer();
         //mp = MediaPlayer.create(this, songWakeUp);
         if (title == null)
-            tvWake.setText("起床囉~~~~~");
+            tvWake.setText("起 床 囉");
         else
             tvWake.setText(title);
 
@@ -100,6 +100,7 @@ public class AlarmWake extends Activity {
                 Intent intent = new Intent(AlarmWake.this, Alarm.class);
                 intent.putExtra("index", index);
                 startActivity(intent);
+                finish();
             }
         });
     }

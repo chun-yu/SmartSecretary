@@ -29,9 +29,9 @@ public class BootReceiver extends BroadcastReceiver {
                 int year = Integer.parseInt(date.split("/")[0]);
                 int month = Integer.parseInt(date.split("/")[1]);
                 int day = Integer.parseInt(date.split("/")[2]);
-
+                String title = cursor.getString(4);
                 if (check == 1)
-                    Alarm.setAlarm(context, year, month, day, hour, min, id);
+                    Alarm.setAlarm(context, year, month, day, hour, min, id,title);
                 cursor.moveToNext();
             }
         }

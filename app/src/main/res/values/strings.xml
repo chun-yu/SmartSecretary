@@ -31,8 +31,9 @@
     <string name="close_Alaem">關 閉 提 醒</string>
     <string name="new_success">新 增 提 醒</string>
     <string name="brfore_time">輸入的" 時間已過 "，無法開啟提醒</string>
+    <string name="is_brfore_time_reset">輸入的" 時間已過 "，無法開啟提醒\n 若要更改請刪除重新設定</string>
     <string name="reset_time">請重新設定日期時間</string>
-    <string name="close_clock">關閉鬧鐘</string>
+    <string name="close_clock">關 閉 鬧 鐘</string>
     <string name="sound_default">預設</string>
     <string name="monday">星期一</string>
     <string name="tuesday">星期二</string>

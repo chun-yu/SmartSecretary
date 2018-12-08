@@ -72,6 +72,7 @@ public class Alarm extends Activity {
         if (b != null) {
             int index = b.getInt("index");
             helper.updateTimeInfo(write_db, alarmIDList.get(index), alarmTimeList.get(index), 0, alarmDateList.get(index), titleList.get(index), noteList.get(index), songList.get(index), songPathList.get(index));
+            memo.notice(Alarm.this,alarmIDList.get(index),alarmDateList.get(index),alarmTimeList.get(index),titleList.get(index));
             checkList.set(index, 0);
             switchList.get(index).setChecked(false);
         }
@@ -102,7 +103,7 @@ public class Alarm extends Activity {
                         else
                             dateStr = YMD[0] + "/" + YMD[1] + "/" + YMD[2];
                         if (!isTimeExist(dateStr, timeStr)) {
-                            helper.insertInfo(write_db, timeStr, 1, dateStr, null, null, "預設", null);
+                            int idd = helper.insertInfo(write_db, timeStr, 1, dateStr, null, null, "預設", null);
                             updateIDList();
                             alarmTimeList.add(timeStr);
                             alarmDateList.add(dateStr);
@@ -111,7 +112,7 @@ public class Alarm extends Activity {
                             noteList.add(null);
                             songList.add("預設");
                             songPathList.add(null);
-                            setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hourOfDay, minute, alarmIDList.get(alarmIDList.size() - 1));
+                            setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hourOfDay, minute, idd,null);
                             Toast.makeText(Alarm.this, "鬧鐘已設定 時間為" + timeStr, Toast.LENGTH_SHORT).show();
                             view_alarm_display = inflater.inflate(R.layout.alarm_display , null, true);
                             viewList.add(view_alarm_display);
@@ -172,7 +173,7 @@ public class Alarm extends Activity {
                         dateStr = YMD[0] + "/" + YMD[1] + "/" + YMD[2];
                     alarmDateList.set(index, dateStr);
                     helper.updateTimeInfo(db, alarmIDList.get(index), alarmTimeList.get(index), 1, dateStr, titleList.get(index), noteList.get(index), songList.get(index), songPathList.get(index));
-                    setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hour, min, alarmIDList.get(index));
+                    setAlarm(Alarm.this, YMD[0], YMD[1], YMD[2], hour, min, alarmIDList.get(index),titleList.get(index));
                     viewList.get(index).setEnabled(true);
                     Toast.makeText(Alarm.this, "鬧鐘已設定 時間為" + alarmTimeList.get(index), Toast.LENGTH_SHORT).show();
                 }
@@ -390,24 +391,26 @@ public class Alarm extends Activity {
             .show();
     }
 
-    public static void setAlarm(Context context, int year, int month, int date, int hour, int min, int RC) {
-        Intent intent = new Intent(context, AlarmReceiver.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("msg", "time's_up");
-        int index = alarmIDList.indexOf(RC);
-        bundle.putInt("index", index);
-        intent.putExtras(bundle);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, RC, intent, FLAG_UPDATE_CURRENT);
+    public static void setAlarm(Context context, int year, int month, int date, int hour, int min, int RC,String title) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-
         Log.d("YEAR", year + "");
         Log.d("MONTH", month + "");
         Log.d("DATE", date + "");
         Log.d("HOUR", hour + "");
         Log.d("MIN", min + "");
         calendar.set(year, month-1, date, hour, min, 0);
+
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("msg", "time's_up");
+        int index = alarmIDList.indexOf(RC);
+        bundle.putInt("index", index);
+        bundle.putString("title",title);
+        bundle.putLong("show_time",calendar.getTimeInMillis());
+        intent.putExtras(bundle);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, RC, intent, FLAG_UPDATE_CURRENT);
         //calendar.set(Calendar.HOUR_OF_DAY, hour);
         //calendar.set(Calendar.MINUTE, min);
         //alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis()
@@ -421,6 +424,7 @@ public class Alarm extends Activity {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, RC, intent, FLAG_UPDATE_CURRENT);
         alarmManager.cancel(alarmIntent);
+        memo.deleteNotice(context,RC);
         alarmIntent = null;
         //Toast.makeText(this, "取消鬧鐘", Toast.LENGTH_SHORT).show();
     }
