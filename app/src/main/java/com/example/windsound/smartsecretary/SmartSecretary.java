@@ -68,7 +68,7 @@ public class SmartSecretary extends Activity {
             public void onClick(View view) {
                 Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "恭維啊～");
+                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, String.format("%-5s\t→\t%-5s\n%-5s\t→\t%-5s\n%-5s\t→\t%-5s", "提醒", "記事鬧鐘", "鬧鐘 or 叫我", "一般鬧鐘", "不包含以上關鍵字", "記事"));
                 try{
                     startActivityForResult(intent,1);
                 }catch (ActivityNotFoundException a){
@@ -125,10 +125,10 @@ public class SmartSecretary extends Activity {
                 if (result.get(0).contains("明天")) {
                     date++;
                 }
-                if (result.get(0).contains("後天")) {
+                else if (result.get(0).contains("後天")) {
                     date += 2;
                 }
-                if (result.get(0).contains("大後天")) {
+                else if (result.get(0).contains("大後天")) {
                     date += 3;
                 }
                 if (result.get(0).contains("點")) {
@@ -140,8 +140,36 @@ public class SmartSecretary extends Activity {
                     }
                     if (resultSplit[1].charAt(0) == '半')
                         min = 30;
-                    if ((date <= c.get(Calendar.DAY_OF_MONTH) && hour < c.get(Calendar.HOUR_OF_DAY) && hour < 12) || result.get(0).contains("下午"))
+                    if ((date <= c.get(Calendar.DAY_OF_MONTH) && hour < c.get(Calendar.HOUR_OF_DAY) && hour < 12) || result.get(0).contains("下午")) {
                         hour += 12;
+                        if (hour < c.get(Calendar.HOUR_OF_DAY)) {
+                            hour -= 12;
+                            if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) {
+                                date = (date % 31) + 1;
+                                if (date == 1) {
+                                    month = (month % 12) + 1;
+                                    if (month == 1)
+                                        year++;
+                                }
+                            }
+                            else if (month == 4 || month == 6 || month == 9 || month == 11) {
+                                date = (date % 30) + 1;
+                                if (date == 1) {
+                                    month = (month % 12) + 1;
+                                    if (month == 1)
+                                        year++;
+                                }
+                            }
+                            else {
+                                date = (date % 28) + 1;
+                                if (date == 1) {
+                                    month = (month % 12) + 1;
+                                    if (month == 1)
+                                        year++;
+                                }
+                            }
+                        }
+                    }
                     String resultSplit2[];
                     if (min != 0) {
                         resultSplit2 = result.get(0).split(min + "");
@@ -159,8 +187,12 @@ public class SmartSecretary extends Activity {
                         note = resultSplit2[1];
                     }
                 }
-                if (result.get(0).contains("分鐘")) {
-                    String resultSplit[] = result.get(0).split("分鐘");
+                else if (result.get(0).contains("分鐘")) {
+                    String resultSplit[];
+                    if (result.get(0).contains("分鐘後"))
+                        resultSplit = result.get(0).split("分鐘後");
+                    else
+                        resultSplit = result.get(0).split("分鐘");
                     min += Integer.parseInt(getNumbers(resultSplit[0]));
                     if (min >= 60) {
                         hour++;
@@ -179,6 +211,42 @@ public class SmartSecretary extends Activity {
                         note = resultSplit[1];
                     }
                 }
+                else if (result.get(0).contains("小時")) {
+                    String resultSplit[];
+                    if (result.get(0).contains("小時後"))
+                        resultSplit = result.get(0).split("小時後");
+                    else if (result.get(0).contains("小時候"))
+                        resultSplit = result.get(0).split("小時候");
+                    else
+                        resultSplit = result.get(0).split("小時");
+                    if (resultSplit[0].charAt(resultSplit[0].length()-1) == '半' || (resultSplit[0].charAt(resultSplit[0].length()-1) == '個' && resultSplit[0].charAt(resultSplit[0].length()-2) == '半'))
+                        min += 30;
+                    else
+                        hour += Integer.parseInt(getNumbers(resultSplit[0]));
+                    if (min >= 60) {
+                        hour++;
+                        min -= 60;
+                    }
+                    if (hour >= 24) {
+                        date++;
+                        hour -= 24;
+                    }
+                    if (result.get(0).contains("鬧鐘") || result.get(0).contains("叫我")) {
+                        title = null;
+                        note = null;
+                    }
+                    else if (resultSplit.length != 1) {
+                        title = resultSplit[1];
+                        note = resultSplit[1];
+                    }
+                }
+                if (!result.get(0).contains("提醒") && !result.get(0).contains("鬧鐘") && !result.get(0).contains("叫我")) {
+                    if (result.get(0).length() < 5)
+                        title = result.get(0);
+                    else
+                        title = result.get(0).substring(0, 5);
+                    note = result.get(0);
+                }
                 final int fYear = year, fMonth = month, fDate = date, fHour = hour, fMin = min;
                 final String fTitle = title, fNote = note;
 
@@ -187,13 +255,21 @@ public class SmartSecretary extends Activity {
                     .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            int idd = helper.insertInfo(write_db, setTimeFormat(fHour, fMin), 1, setDateFormat(fYear, fMonth, fDate), fTitle, fNote, "預設", null);
-                            Alarm.setAlarm(SmartSecretary.this, fYear, fMonth, fDate, fHour, fMin, idd,fTitle);
+                            //int idd = helper.insertInfo(write_db, setTimeFormat(fHour, fMin), 1, setDateFormat(fYear, fMonth, fDate), fTitle, fNote, "預設", null);
+                            //Alarm.setAlarm(SmartSecretary.this, fYear, fMonth, fDate, fHour, fMin, idd,fTitle);
                             if (result.get(0).contains("提醒")) {
+                                helper.insertInfo(write_db, setTimeFormat(fHour, fMin), 1, setDateFormat(fYear, fMonth, fDate), fTitle, fNote, "預設", null);
+                                Alarm.setAlarm(SmartSecretary.this, fYear, fMonth, fDate, fHour, fMin, helper.getDBcount(), fTitle);
                                 Toast.makeText(SmartSecretary.this, "提醒已設定 時間為" + setTimeFormat(fHour, fMin), Toast.LENGTH_SHORT).show();
                             }
                             else if (result.get(0).contains("鬧鐘") || result.get(0).contains("叫我")) {
+                                helper.insertInfo(write_db, setTimeFormat(fHour, fMin), 1, setDateFormat(fYear, fMonth, fDate), fTitle, fNote, "預設", null);
+                                Alarm.setAlarm(SmartSecretary.this, fYear, fMonth, fDate, fHour, fMin, helper.getDBcount(), fTitle);
                                 Toast.makeText(SmartSecretary.this, "鬧鐘已設定 時間為" + setTimeFormat(fHour, fMin), Toast.LENGTH_SHORT).show();
+                            }
+                            else {
+                                helper.insertInfo(write_db, setTimeFormat(fHour, fMin), 0, setDateFormat(fYear, fMonth, fDate), fTitle, fNote, "預設", null);
+                                Toast.makeText(SmartSecretary.this, "記事已建立", Toast.LENGTH_SHORT).show();
                             }
                         }
                     })

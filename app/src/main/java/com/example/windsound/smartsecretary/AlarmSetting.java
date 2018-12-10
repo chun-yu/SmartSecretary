@@ -130,13 +130,21 @@ public class AlarmSetting extends Activity {
         btnBack.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
-               finish();
+               //finish();
+                Intent intent = new Intent();
+                intent.setClass(AlarmSetting.this, Alarm.class);
+                startActivity(intent);
+
             }
         });
         back_bottom.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
-                finish();
+                //finish();
+                Intent intent = new Intent();
+                intent.setClass(AlarmSetting.this, Alarm.class);
+                startActivity(intent);
+
             }
         });
         btnDetermine.setOnClickListener(new Button.OnClickListener(){
@@ -150,14 +158,16 @@ public class AlarmSetting extends Activity {
                         Alarm.cancelAlarm(AlarmSetting.this, Alarm.alarmIDList.get(index));
                         Alarm.setAlarm(AlarmSetting.this, year, month+1, day, hour, min, Alarm.alarmIDList.get(index),Alarm.titleList.get(index));
                         Toast.makeText(AlarmSetting.this, "時間已修改為 " + time, Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent();
-                        setResult(RESULT_OK, intent);
-                        finish();
+                        //finish();
                     }
                     else {
                         Toast.makeText(AlarmSetting.this, "該時間已設定過", Toast.LENGTH_SHORT).show();
-                        finish();
+                        //finish();
                     }
+                    Intent intent = new Intent();
+                    intent.setClass(AlarmSetting.this, Alarm.class);
+                    startActivity(intent);
+                    setResult(RESULT_OK, intent);
                 }
             }
         });
@@ -172,14 +182,16 @@ public class AlarmSetting extends Activity {
                         Alarm.cancelAlarm(AlarmSetting.this, Alarm.alarmIDList.get(index));
                         Alarm.setAlarm(AlarmSetting.this, year, month+1, day, hour, min, Alarm.alarmIDList.get(index),Alarm.titleList.get(index));
                         Toast.makeText(AlarmSetting.this, "時間已修改為 " + time, Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent();
-                        setResult(RESULT_OK, intent);
-                        finish();
+                        //finish();
                     }
                     else {
                         Toast.makeText(AlarmSetting.this, "該時間已設定過", Toast.LENGTH_SHORT).show();
-                        finish();
+                        //finish();
                     }
+                    Intent intent = new Intent();
+                    intent.setClass(AlarmSetting.this, Alarm.class);
+                    startActivity(intent);
+                    setResult(RESULT_OK, intent);
                 }
             }
         });

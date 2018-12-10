@@ -160,8 +160,17 @@ public class Alarm extends Activity {
                 if (compoundButton.isChecked()) {
                     int hour = Integer.parseInt(alarmTimeList.get(index).split(":")[0]);
                     int min = Integer.parseInt(alarmTimeList.get(index).split(":")[1]);
+                    int year = Integer.parseInt(alarmDateList.get(index).split("/")[0]);
+                    int month = Integer.parseInt(alarmDateList.get(index).split("/")[1]);
+                    int date = Integer.parseInt(alarmDateList.get(index).split("/")[2]);
 
                     setDate(hour, min);
+                    if (YMD[0] < year)
+                        YMD[0] = year;
+                    if (YMD[1] < month)
+                        YMD[1] = month;
+                    if (YMD[2] < date)
+                        YMD[2] = date;
                     String dateStr = "";
                     if (YMD[1] < 10 && YMD[2] < 10)
                         dateStr = YMD[0] + "/0" + YMD[1] + "/0" + YMD[2];
@@ -323,24 +332,27 @@ public class Alarm extends Activity {
         if (hour < nowHour || (hour == nowHour && min <= nowMin)) {
             if (nowMonth == 1 || nowMonth == 3 || nowMonth == 5 || nowMonth == 7 || nowMonth == 8 || nowMonth == 10 || nowMonth == 12) {
                 nowDate = (nowDate % 31) + 1;
-                if (nowDate == 1)
+                if (nowDate == 1) {
                     nowMonth = (nowMonth % 12) + 1;
-                if (nowMonth == 1)
-                    nowYear++;
+                    if (nowMonth == 1)
+                        nowYear++;
+                }
             }
             else if (nowMonth == 4 || nowMonth == 6 || nowMonth == 9 || nowMonth == 11) {
                 nowDate = (nowDate % 30) + 1;
-                if (nowDate == 1)
+                if (nowDate == 1) {
                     nowMonth = (nowMonth % 12) + 1;
-                if (nowMonth == 1)
-                    nowYear++;
+                    if (nowMonth == 1)
+                        nowYear++;
+                }
             }
             else {
                 nowDate = (nowDate % 28) + 1;
-                if (nowDate == 1)
+                if (nowDate == 1) {
                     nowMonth = (nowMonth % 12) + 1;
-                if (nowMonth == 1)
-                    nowYear++;
+                    if (nowMonth == 1)
+                        nowYear++;
+                }
             }
         }
         YMD[0] = nowYear;
@@ -350,9 +362,9 @@ public class Alarm extends Activity {
 
     void showAlertDialog(final SQLiteDatabase db, String timeStr, final int id) {
         new AlertDialog.Builder(Alarm.this)
-            .setTitle("Want to delele?")
-            .setMessage("Want to delete alarm " + timeStr)
-            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            .setTitle("確定刪除鬧鐘?")
+            .setMessage("時間 : " + timeStr)
+            .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     helper.remove_Time(db, id);
@@ -383,7 +395,7 @@ public class Alarm extends Activity {
                     }
                 }
             })
-            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                 }
@@ -391,7 +403,7 @@ public class Alarm extends Activity {
             .show();
     }
 
-    public static void setAlarm(Context context, int year, int month, int date, int hour, int min, int RC,String title) {
+    public static void setAlarm(Context context, int year, int month, int date, int hour, int min, int RC, String title) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         Log.d("YEAR", year + "");

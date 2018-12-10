@@ -61,12 +61,12 @@ public class AlarmWake extends Activity {
             tvWake.setText(title);
 
         mp = new MediaPlayer();
+        mp.reset();
         if (songPath != null) {
             try {
-                mp.reset();
                 mp.setDataSource(songPath);
                 mp.prepare();
-                mp.start();
+                //mp.start();
             } catch(IOException e) {
                 Log.v(getString(R.string.app_name), e.getMessage());
             }

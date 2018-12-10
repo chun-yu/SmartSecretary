@@ -35,6 +35,7 @@ public class MusicList extends Activity {
     File SDCardPath;
     String musicPath = "";
     int choice = -1, index = 0;
+    int songWakeUp = R.raw.wake_up;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,22 +47,26 @@ public class MusicList extends Activity {
         Bundle bundle = this.getIntent().getExtras();
         if (bundle != null)
             index = bundle.getInt("index");
-        Log.e("INDEX", index + "");
+        //Log.d("INDEX", index + "");
 
         musicList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                try {
-                    mp.reset();
-                    musicPath = SDCardPath + "/" + songs.get(position);
-                    choice = position;
-                    mp.setDataSource(musicPath);
-                    mp.prepare();
-                    mp.start();
-                } catch(IOException e) {
-                    Log.v(getString(R.string.app_name), e.getMessage());
+                mp.reset();
+                if (position != 0) {
+                    try {
+                        musicPath = SDCardPath + "/" + songs.get(position);
+                        mp.setDataSource(musicPath);
+                        mp.prepare();
+                    } catch (IOException e) {
+                        Log.v(getString(R.string.app_name), e.getMessage());
+                    }
                 }
-
+                else
+                    mp = MediaPlayer.create(MusicList.this, songWakeUp);
+                choice = position;
+                mp.setLooping(true);
+                mp.start();
             }
         });
 
@@ -90,7 +95,7 @@ public class MusicList extends Activity {
     }
 
     public void updateSongList() {
-        if(!Environment.getExternalStorageState().equals(Environment.MEDIA_REMOVED) ) {
+        if(!Environment.getExternalStorageState().equals(Environment.MEDIA_REMOVED)) {
             /*
             SDCardPath = Environment.getExternalStorageDirectory();
             SDCardPath = new File(MEDIA_PATH);
@@ -104,20 +109,26 @@ public class MusicList extends Activity {
                 musicList.setAdapter(songList);
             }
             */
-            Log.e("外部記憶體存在", Environment.isExternalStorageEmulated() +  "");
+            //Log.d("外部記憶體存在", Environment.isExternalStorageEmulated() +  "");
 
+            songs.clear();
+            songs.add("預設");
             SDCardPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
-            Log.e("SDCardPath", SDCardPath + "");
+            Log.d("SDCardPath", SDCardPath + "");
             File[] musics = SDCardPath.listFiles();
             if (musics != null) {
+                Log.d("enter if ", "musics != null");
                 for (File file : musics) {
                     Log.d("歌曲的位置", "→" + file);
                     songs.add(file.getName());
                 }
             }
+            for (int i = 0; i < songs.size(); i++)
+                Log.d("Song", songs.get(i));
             ArrayAdapter<String> songList = new ArrayAdapter<String>(this, android.R.layout.select_dialog_singlechoice, songs);
-            //musicList.setItemChecked(0, true);
             musicList.setAdapter(songList);
+            //musicList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            musicList.setItemChecked(0, true);
         }
     }
 
