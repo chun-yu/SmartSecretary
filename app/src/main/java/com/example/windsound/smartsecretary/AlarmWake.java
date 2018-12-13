@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.Ringtone;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
@@ -18,6 +19,8 @@ import android.widget.TextView;
 
 import java.util.Calendar;
 import java.io.IOException;
+
+import static android.media.RingtoneManager.TYPE_ALARM;
 
 public class AlarmWake extends Activity {
 
@@ -62,6 +65,7 @@ public class AlarmWake extends Activity {
 
         mp = new MediaPlayer();
         mp.reset();
+        mp.setAudioStreamType(AudioManager.STREAM_ALARM);
         if (songPath != null) {
             try {
                 mp.setDataSource(songPath);
@@ -71,9 +75,9 @@ public class AlarmWake extends Activity {
                 Log.v(getString(R.string.app_name), e.getMessage());
             }
         }
-        else
+        else {
             mp = MediaPlayer.create(this, songWakeUp);
-        //mp.setAudioStreamType(AudioManager.STREAM_ALARM);
+        }
         mp.setVolume(maxVolume, maxVolume);
         mp.setLooping(true);
         mp.start();

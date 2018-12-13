@@ -86,12 +86,13 @@ public class SmartSecretary extends Activity {
         final SQLiteDatabase write_db = helper.getWritableDatabase();
 
         int year = c.get(Calendar.YEAR), month = c.get(Calendar.MONTH) + 1, date = c.get(Calendar.DAY_OF_MONTH), hour = c.get(Calendar.HOUR_OF_DAY), min = c.get(Calendar.MINUTE);
-        String title = null, note = null;
+        String title = null, note = null, mode = null;
         boolean containMonth = false;
 
         if (requestCode == 1) {
             if (resultCode == RESULT_OK && data != null) {
                 final ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                Log.d("語音", result.get(0));
                 if (result.get(0).contains("月")) {
                     containMonth = true;
                     String resultSplit[] = result.get(0).split("月");
@@ -181,10 +182,12 @@ public class SmartSecretary extends Activity {
                     if (result.get(0).contains("鬧鐘") || result.get(0).contains("叫我")) {
                         title = null;
                         note = null;
+                        mode = "一般鬧鐘";
                     }
                     else if (resultSplit2.length != 1) {
                         title = resultSplit2[1];
                         note = resultSplit2[1];
+                        mode = "記事鬧鐘";
                     }
                 }
                 else if (result.get(0).contains("分鐘")) {
@@ -194,10 +197,10 @@ public class SmartSecretary extends Activity {
                     else
                         resultSplit = result.get(0).split("分鐘");
                     min += Integer.parseInt(getNumbers(resultSplit[0]));
-                    if (min >= 60) {
+                    while (min >= 60) {
                         hour++;
                         min -= 60;
-                        if (hour >= 24) {
+                        while (hour >= 24) {
                             date++;
                             hour -= 24;
                         }
@@ -205,10 +208,12 @@ public class SmartSecretary extends Activity {
                     if (result.get(0).contains("鬧鐘") || result.get(0).contains("叫我")) {
                         title = null;
                         note = null;
+                        mode = "一般鬧鐘";
                     }
                     else if (resultSplit.length != 1) {
                         title = resultSplit[1];
                         note = resultSplit[1];
+                        mode = "記事鬧鐘";
                     }
                 }
                 else if (result.get(0).contains("小時")) {
@@ -221,23 +226,24 @@ public class SmartSecretary extends Activity {
                         resultSplit = result.get(0).split("小時");
                     if (resultSplit[0].charAt(resultSplit[0].length()-1) == '半' || (resultSplit[0].charAt(resultSplit[0].length()-1) == '個' && resultSplit[0].charAt(resultSplit[0].length()-2) == '半'))
                         min += 30;
-                    else
-                        hour += Integer.parseInt(getNumbers(resultSplit[0]));
+                    hour += Integer.parseInt(getNumbers(resultSplit[0]));
                     if (min >= 60) {
                         hour++;
                         min -= 60;
                     }
-                    if (hour >= 24) {
+                    while (hour >= 24) {
                         date++;
                         hour -= 24;
                     }
                     if (result.get(0).contains("鬧鐘") || result.get(0).contains("叫我")) {
                         title = null;
                         note = null;
+                        mode = "一般鬧鐘";
                     }
                     else if (resultSplit.length != 1) {
                         title = resultSplit[1];
                         note = resultSplit[1];
+                        mode = "記事鬧鐘";
                     }
                 }
                 if (!result.get(0).contains("提醒") && !result.get(0).contains("鬧鐘") && !result.get(0).contains("叫我")) {
@@ -246,11 +252,12 @@ public class SmartSecretary extends Activity {
                     else
                         title = result.get(0).substring(0, 5);
                     note = result.get(0);
+                    mode = "記事";
                 }
                 final int fYear = year, fMonth = month, fDate = date, fHour = hour, fMin = min;
                 final String fTitle = title, fNote = note;
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("語音輸入結果")
                     .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                         @Override
@@ -285,9 +292,10 @@ public class SmartSecretary extends Activity {
                 if (builderNote == null)
                     builderNote = "無內容";
                 //builder.setMessage(result.get(0));
-                builder.setMessage("時間 : " + setDateFormat(year, month, date) + " " + setTimeFormat(hour, min) + "\n" +
-                        "標題 : " + builderTitle + "\n" +
-                        "內容 : " + builderNote);
+                builder.setMessage("類別 : " + mode + "\n" +
+                                   "時間 : " + setDateFormat(year, month, date) + " " + setTimeFormat(hour, min) + "\n" +
+                                   "標題 : " + builderTitle + "\n" +
+                                   "內容 : " + builderNote);
                 AlertDialog dialog = builder.create();
                 dialog.show();
                 dialog.setCancelable(false);
@@ -301,6 +309,24 @@ public class SmartSecretary extends Activity {
         while (matcher.find()) {
             return matcher.group(0);
         }
+        if (content.contains("一"))
+            return "1";
+        else if (content.contains("二"))
+            return "2";
+        else if (content.contains("三"))
+            return "3";
+        else if (content.contains("四"))
+            return "4";
+        else if (content.contains("五"))
+            return "5";
+        else if (content.contains("六"))
+            return "6";
+        else if (content.contains("七"))
+            return "7";
+        else if (content.contains("八"))
+            return "8";
+        else if (content.contains("九"))
+            return "9";
         return "0";
     }
 

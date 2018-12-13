@@ -251,7 +251,7 @@ public class AlarmSetting extends Activity {
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Bundle bundle = new Bundle();
+        Bundle bundle = this.getIntent().getExtras();;
         int index = bundle.getInt("index");
         if (resultCode == RESULT_OK) {
             if (bundle.getString("song") != null)
