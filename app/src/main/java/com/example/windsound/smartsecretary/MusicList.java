@@ -86,10 +86,10 @@ public class MusicList extends Activity {
                     bundle.putString("song", songs.get(choice));
                     bundle.putString("songPath", musicPath);
                     intent.putExtras(bundle);
-                    startActivity(intent);
-                }
-                else
+                    setResult(RESULT_OK, intent);
                     finish();
+                }
+                finish();
             }
         });
     }

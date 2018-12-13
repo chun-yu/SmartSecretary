@@ -123,28 +123,20 @@ public class AlarmSetting extends Activity {
                 Bundle bundle = new Bundle();
                 bundle.putInt("index", index);
                 intent.putExtras(bundle);
-                startActivity(intent);
+                startActivityForResult(intent,100);
             }
         });
 
         btnBack.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
-               //finish();
-                Intent intent = new Intent();
-                intent.setClass(AlarmSetting.this, Alarm.class);
-                startActivity(intent);
-
+                finish();
             }
         });
         back_bottom.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
-                //finish();
-                Intent intent = new Intent();
-                intent.setClass(AlarmSetting.this, Alarm.class);
-                startActivity(intent);
-
+                finish();
             }
         });
         btnDetermine.setOnClickListener(new Button.OnClickListener(){
@@ -158,16 +150,13 @@ public class AlarmSetting extends Activity {
                         Alarm.cancelAlarm(AlarmSetting.this, Alarm.alarmIDList.get(index));
                         Alarm.setAlarm(AlarmSetting.this, year, month+1, day, hour, min, Alarm.alarmIDList.get(index),Alarm.titleList.get(index));
                         Toast.makeText(AlarmSetting.this, "時間已修改為 " + time, Toast.LENGTH_SHORT).show();
-                        //finish();
                     }
                     else {
                         Toast.makeText(AlarmSetting.this, "該時間已設定過", Toast.LENGTH_SHORT).show();
-                        //finish();
                     }
                     Intent intent = new Intent();
-                    intent.setClass(AlarmSetting.this, Alarm.class);
-                    startActivity(intent);
                     setResult(RESULT_OK, intent);
+                    finish();
                 }
             }
         });
@@ -182,16 +171,13 @@ public class AlarmSetting extends Activity {
                         Alarm.cancelAlarm(AlarmSetting.this, Alarm.alarmIDList.get(index));
                         Alarm.setAlarm(AlarmSetting.this, year, month+1, day, hour, min, Alarm.alarmIDList.get(index),Alarm.titleList.get(index));
                         Toast.makeText(AlarmSetting.this, "時間已修改為 " + time, Toast.LENGTH_SHORT).show();
-                        //finish();
                     }
                     else {
                         Toast.makeText(AlarmSetting.this, "該時間已設定過", Toast.LENGTH_SHORT).show();
-                        //finish();
                     }
                     Intent intent = new Intent();
-                    intent.setClass(AlarmSetting.this, Alarm.class);
-                    startActivity(intent);
                     setResult(RESULT_OK, intent);
+                    finish();
                 }
             }
         });
@@ -262,5 +248,21 @@ public class AlarmSetting extends Activity {
                     }
                 })
                 .show();
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Bundle bundle = new Bundle();
+        int index = bundle.getInt("index");
+        if (resultCode == RESULT_OK) {
+            if (bundle.getString("song") != null)
+                song = bundle.getString("song");
+            else
+                song = Alarm.songList.get(index);
+            if (bundle.getString("songPath") != null)
+                songPath = bundle.getString("songPath");
+            else
+                songPath = Alarm.songPathList.get(index);
+        }
+        tvAlarmSound.setText(song);
     }
 }

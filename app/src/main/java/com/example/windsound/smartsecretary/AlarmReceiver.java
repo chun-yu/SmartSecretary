@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
@@ -39,6 +40,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             //Toast.makeText(context, "time's up", Toast.LENGTH_SHORT).show();
             Intent i = new Intent(context, AlarmWake.class);
             //i.putExtra("index", index);
+            //i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(i);
         }else{
             String title = bundle.getString("title");
@@ -63,6 +65,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         Intent intent = new Intent(context, memo.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, id, intent, FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context,"default")
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher))
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle(context.getString(R.string.app_name))
                 .setContentText(title)

@@ -223,8 +223,8 @@ public class Alarm extends Activity {
 
     public void showTime(final SQLiteDatabase write_db) {
         cursor = helper.getInfo(helper.getReadableDatabase());
-        for (int i = LLV.getChildCount(); i >= 0; i--) {
-            LLV.removeView(LLV.getChildAt(i));
+        if (LLV.getChildCount()>=0) {
+            LLV.removeAllViews();
         }
         alarmTimeList.clear();
         alarmDateList.clear();
@@ -291,6 +291,7 @@ public class Alarm extends Activity {
             }
             //Log.d("getCount() ", cursor.getCount() + "");
         }
+        cursor.close();
     }
 
     public static boolean isTimeExist(String newDate, String newTime) {
@@ -300,11 +301,14 @@ public class Alarm extends Activity {
             for (int i = 0; i < cursor.getCount(); i++) {
                 String time = cursor.getString(1);
                 String date = cursor.getString(3);
-                if (newDate.equals(date) && newTime.equals(time))
+                if (newDate.equals(date) && newTime.equals(time)){
+                    cursor.close();
                     return true;
+                }
                 cursor.moveToNext();
             }
         }
+        cursor.close();
         return false;
     }
 
@@ -319,6 +323,7 @@ public class Alarm extends Activity {
                 cursor.moveToNext();
             }
         }
+        cursor.close();
     }
 
     void setDate(int hour, int min) {
@@ -378,7 +383,6 @@ public class Alarm extends Activity {
                     //Log.d("tvList", tvList.get(idx) + "");
                     Log.d("alarmTimeList", alarmTimeList.get(idx) + "");
                     Log.d("alarmIDList", alarmIDList.get(idx) + "");
-                    LLV.removeView(viewList.get(idx));
                     viewList.remove(idx);
                     checkList.remove(idx);
                     switchList.remove(idx);
@@ -393,6 +397,8 @@ public class Alarm extends Activity {
                     for (int i = idx; i < alarmIDList.size(); i++) {
                         setListener(db, switchList.get(i), tvList.get(i), idx);
                     }
+                    SQLiteDatabase write_db = helper.getWritableDatabase();
+                    showTime(write_db);
                 }
             })
             .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -444,10 +450,8 @@ public class Alarm extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         SQLiteDatabase write_db = helper.getWritableDatabase();
-        if (requestCode == 100) {
             if (resultCode == RESULT_OK) {
                 showTime(write_db);
             }
-        }
     }
 }

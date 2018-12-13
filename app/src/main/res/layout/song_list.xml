@@ -7,47 +7,49 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="60"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/btnMusicBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
             android:background="@color/colorPrimary"
             android:text="@string/back"
             android:textColor="@android:color/background_light"
-            android:textSize="24sp" />
+            android:textSize="16dp" />
 
         <TextView
             android:id="@+id/tvMusicSetting"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="2.5"
+            android:layout_weight="8"
             android:background="@color/colorPrimaryLight"
             android:gravity="center"
             android:text="@string/music_setting"
+            android:textStyle="bold"
             android:textAlignment="center"
             android:textColor="@android:color/background_light"
-            android:textSize="30sp" />
+            android:textSize="24dp" />
 
         <Button
             android:id="@+id/btnMusicDetermine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
             android:background="@color/colorPrimary"
             android:text="@string/determine"
             android:textColor="@android:color/background_light"
-            android:textSize="24sp" />
+            android:textSize="16dp" />
     </LinearLayout>
 
     <ListView
         android:id="@+id/musicList"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="5"
         android:drawSelectorOnTop="false"
         android:choiceMode="singleChoice"/>
 </LinearLayout>

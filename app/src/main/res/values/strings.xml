@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SmartSecretary</string>
     <string name="create_alarm">新 增 鬧 鐘</string>
-    <string name="title_name">智 慧 秘 書</string>
+    <string name="title_name">小 秘 書</string>
     <string name="new_note">新 增\n提 醒</string>
     <string name="_new">新 增</string>
     <string name="my_alarm">鬧 鐘</string>

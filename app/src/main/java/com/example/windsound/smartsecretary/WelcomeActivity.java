@@ -14,8 +14,9 @@ public class WelcomeActivity extends Activity {
             @Override
             public void run() {
                 try{
-                    Thread.sleep(1000);
+                    Thread.sleep(1800);
                     startActivity(new Intent().setClass(WelcomeActivity.this,SmartSecretary.class));
+                    finish();
                 }catch (InterruptedException e){
                     e.printStackTrace();
                 }
